@@ -15,7 +15,7 @@ public class ChessGame {
       System.out.print("\033[H\033[2J"); //Clear Console Command
       clearMoveOutputFile();
       try {
-        File myObj = new File("/Users/akash/software/Akash/Java Projects/Chess/moveTableBaseWhite.txt");
+        File myObj = new File("/Users/akash/software/Akash/Java Projects/Chess-Github/moveTableBaseWhite.txt");
         Scanner reader = new Scanner(myObj);
         while (reader.hasNextLine()) {
             String boardStr = "";
@@ -28,7 +28,7 @@ public class ChessGame {
         reader.close();
       } catch (FileNotFoundException e) { }
       try {
-        File myObj = new File("/Users/akash/software/Akash/Java Projects/Chess/moveTableBaseBlack.txt");
+        File myObj = new File("/Users/akash/software/Akash/Java Projects/Chess-Github/moveTableBaseBlack.txt");
         Scanner reader = new Scanner(myObj);
         while (reader.hasNextLine()) {
             String boardStr = "";
@@ -233,7 +233,7 @@ public class ChessGame {
         if (depth == 0) {
             if (!isAlreadyFound) {
                 try{
-                    String fileName = "/Users/akash/software/Akash/Java Projects/Chess/moveTableBase" + ((isComputerWhite) ? "White.txt" : "Black.txt");
+                    String fileName = "/Users/akash/software/Akash/Java Projects/Chess-Github/moveTableBase" + ((isComputerWhite) ? "White.txt" : "Black.txt");
                     File file = new File(fileName);
                     FileWriter writer = new FileWriter(file, true);
                     if (file.length() != 0) {
@@ -331,7 +331,7 @@ public class ChessGame {
     }
     public static void clearMoveOutputFile() {
         try{
-            File file = new File("/Users/akash/software/Akash/Java Projects/Chess/MovesPerformed.txt");
+            File file = new File("/Users/akash/software/Akash/Java Projects/Chess-Github/MovesPerformed.txt");
             FileWriter writer = new FileWriter(file);
             writer.write("");
             writer.close();
@@ -341,7 +341,7 @@ public class ChessGame {
     }
     public static void appendToFile(int initI, int initJ, int finI, int finJ) {
         try{
-            File file = new File("/Users/akash/software/Akash/Java Projects/Chess/MovesPerformed.txt");
+            File file = new File("/Users/akash/software/Akash/Java Projects/Chess-Github/MovesPerformed.txt");
             FileWriter writer = new FileWriter(file, true);
             if (file.length() != 0) {
                 writer.write("\n");
