@@ -5,7 +5,6 @@
 import java.io.*;
 import java.util.*;
 public class ChessGame {
-    //hi
     public static int recur = 0;
     public static int moveCounter = 0;
     public static TreeMap<String, Integer> boardFreq = new TreeMap<>(); //Checks for 3 fold rule (tie)
