@@ -21,7 +21,7 @@ public class ChessGame {
       System.out.print("\033[H\033[2J"); //Clear Console Command
       clearMoveOutputFile();
       fillBestMoveLog("moveTB-D4.txt", bestMoveLog, bestMoveLog4, true);
-      //fillBestMoveLog("moveTB-D2.txt", bestMoveLog, bestMoveLog2, false);
+      //fillBestMoveLog("moveTB-D2.txt", bestMoveLog, bestMoveLog2, false);//true for testing only
       playGame(chessBoard);
     }
     public static void playGame(Board board) {
