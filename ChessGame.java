@@ -11,6 +11,8 @@ public class ChessGame {
     public static TreeMap<String, String> bestMoveLogWhite = new TreeMap<>(); //Board String to Move String
     public static TreeMap<String, String> bestMoveLogBlack = new TreeMap<>(); //Board String to Move String
     public static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
+    public static int depth1 = 4;
+    public static int depth2 = 6;
     public static void main(String args[]) { //Driver
       if (!System.getProperty("os.name").equals("Mac OS X")) {
         folder = "E:/Akash/Java Projects/Chess-Github/";
@@ -18,8 +20,8 @@ public class ChessGame {
       Board chessBoard = new Board();
       System.out.print("\033[H\033[2J"); //Clear Console Command
       clearMoveOutputFile();
-      fillBestMoveLog("moveTableBaseWhite.txt", true);
-      fillBestMoveLog("moveTableBaseBlack.txt", false);
+      fillBestMoveLog("moveTBWhite-4-6.txt", true);
+      fillBestMoveLog("moveTBBlack-4-6.txt", false);
       playGame(chessBoard);
     }
     public static void playGame(Board board) {
@@ -213,7 +215,7 @@ public class ChessGame {
         if (depth == 0) {
             if (!isAlreadyFound) {
                 try{
-                    String fileName = folder + "moveTableBase" + ((isComputerWhite) ? "White.txt" : "Black.txt");
+                    String fileName = folder + "moveTB" + ((isComputerWhite) ? "White-" : "Black-") + depth1 + "-" + depth2 + ".txt";
                     File file = new File(fileName);
                     FileWriter writer = new FileWriter(file, true);
                     if (file.length() != 0) {
@@ -300,9 +302,9 @@ public class ChessGame {
     public static void callAI(String gamePhase, Board board, boolean currPlayerIsWhite, String player) {
         System.out.println(player + "'s Turn : Move #" + moveCounter + gamePhase);
         int tempMoveCounter = moveCounter;
-        int depth = 4;
-        if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 65) {
-            depth = 6;
+        int depth = depth1;
+        if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 75) {
+            depth = depth2;
         }
         findBestMove(board, true, 0, depth, tempMoveCounter, currPlayerIsWhite);
         System.out.println("Num Recursions: " + recur);
@@ -343,15 +345,19 @@ public class ChessGame {
                 }
                 String move = reader.nextLine();
                 if (isWhite) {
-                    bestMoveLogWhite.put(boardStr, move);
+                    if (bestMoveLogWhite.get(boardStr) == null) {
+                        bestMoveLogWhite.put(boardStr, move);
+                    }
                 } else {
-                    bestMoveLogBlack.put(boardStr, move);
+                    if (bestMoveLogBlack.get(boardStr) == null) {
+                        bestMoveLogBlack.put(boardStr, move);
+                    }
                 }
             }
             reader.close();
-          } catch (FileNotFoundException e) { 
-              System.out.println("File Error");
-          }
+        } catch (FileNotFoundException e) { 
+            System.out.println("File Error");
+        }
     }
     public static double rounded(double num) {
         return Math.round(num*1000)/1000.0;
