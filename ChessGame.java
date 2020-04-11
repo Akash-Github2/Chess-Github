@@ -10,36 +10,16 @@ public class ChessGame {
     public static TreeMap<String, Integer> boardFreq = new TreeMap<>(); //Checks for 3 fold rule (tie)
     public static TreeMap<String, String> bestMoveLogWhite = new TreeMap<>(); //Board String to Move String
     public static TreeMap<String, String> bestMoveLogBlack = new TreeMap<>(); //Board String to Move String
+    public static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
     public static void main(String args[]) { //Driver
+      if (!System.getProperty("os.name").equals("Mac OS X")) {
+        folder = "E:/Akash/Java Projects/Chess-Github/";
+      }
       Board chessBoard = new Board();
       System.out.print("\033[H\033[2J"); //Clear Console Command
       clearMoveOutputFile();
-      try {
-        File myObj = new File("/Users/akash/software/Akash/Java Projects/Chess-Github/moveTableBaseWhite.txt");
-        Scanner reader = new Scanner(myObj);
-        while (reader.hasNextLine()) {
-            String boardStr = "";
-            for (int i = 0; i < 17; i++) {
-                boardStr += reader.nextLine() + "\n";
-            }
-            String move = reader.nextLine();
-            bestMoveLogWhite.put(boardStr, move);
-        }
-        reader.close();
-      } catch (FileNotFoundException e) { }
-      try {
-        File myObj = new File("/Users/akash/software/Akash/Java Projects/Chess-Github/moveTableBaseBlack.txt");
-        Scanner reader = new Scanner(myObj);
-        while (reader.hasNextLine()) {
-            String boardStr = "";
-            for (int i = 0; i < 17; i++) {
-                boardStr += reader.nextLine() + "\n";
-            }
-            String move = reader.nextLine();
-            bestMoveLogBlack.put(boardStr, move);
-        }
-        reader.close();
-      } catch (FileNotFoundException e) { }
+      fillBestMoveLog("moveTableBaseWhite.txt", true);
+      fillBestMoveLog("moveTableBaseBlack.txt", false);
       playGame(chessBoard);
     }
     public static void playGame(Board board) {
@@ -233,7 +213,7 @@ public class ChessGame {
         if (depth == 0) {
             if (!isAlreadyFound) {
                 try{
-                    String fileName = "/Users/akash/software/Akash/Java Projects/Chess-Github/moveTableBase" + ((isComputerWhite) ? "White.txt" : "Black.txt");
+                    String fileName = folder + "moveTableBase" + ((isComputerWhite) ? "White.txt" : "Black.txt");
                     File file = new File(fileName);
                     FileWriter writer = new FileWriter(file, true);
                     if (file.length() != 0) {
@@ -271,7 +251,7 @@ public class ChessGame {
             if (board.movesSinceNoCaptureOrPawn != 0) {
                 System.out.println("Moves Since No Capture/Pawn Mvmt: " + board.movesSinceNoCaptureOrPawn);
             }
-            appendToFile(initI, initJ, finI, finJ);
+            //appendToFile(initI, initJ, finI, finJ);
             if (boardFreq.get(board.toString()) == null) {
                 boardFreq.put(board.toString(), 1);
             } else {
@@ -321,7 +301,7 @@ public class ChessGame {
         System.out.println(player + "'s Turn : Move #" + moveCounter + gamePhase);
         int tempMoveCounter = moveCounter;
         int depth = 4;
-        if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 120) {
+        if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 65) {
             depth = 6;
         }
         findBestMove(board, true, 0, depth, tempMoveCounter, currPlayerIsWhite);
@@ -331,7 +311,7 @@ public class ChessGame {
     }
     public static void clearMoveOutputFile() {
         try{
-            File file = new File("/Users/akash/software/Akash/Java Projects/Chess-Github/MovesPerformed.txt");
+            File file = new File(folder + "MovesPerformed.txt");
             FileWriter writer = new FileWriter(file);
             writer.write("");
             writer.close();
@@ -341,7 +321,7 @@ public class ChessGame {
     }
     public static void appendToFile(int initI, int initJ, int finI, int finJ) {
         try{
-            File file = new File("/Users/akash/software/Akash/Java Projects/Chess-Github/MovesPerformed.txt");
+            File file = new File(folder + "MovesPerformed.txt");
             FileWriter writer = new FileWriter(file, true);
             if (file.length() != 0) {
                 writer.write("\n");
@@ -351,6 +331,27 @@ public class ChessGame {
         }catch(Exception e) {
             System.out.println("FILE ERROR");
         }
+    }
+    public static void fillBestMoveLog(String filename, boolean isWhite) {
+        try {
+            File myObj = new File(folder + filename);
+            Scanner reader = new Scanner(myObj);
+            while (reader.hasNextLine()) {
+                String boardStr = "";
+                for (int i = 0; i < 17; i++) {
+                    boardStr += reader.nextLine() + "\n";
+                }
+                String move = reader.nextLine();
+                if (isWhite) {
+                    bestMoveLogWhite.put(boardStr, move);
+                } else {
+                    bestMoveLogBlack.put(boardStr, move);
+                }
+            }
+            reader.close();
+          } catch (FileNotFoundException e) { 
+              System.out.println("File Error");
+          }
     }
     public static double rounded(double num) {
         return Math.round(num*1000)/1000.0;
