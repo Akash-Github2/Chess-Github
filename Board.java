@@ -519,6 +519,19 @@ public class Board {
         retStr += "---------------------------------\n";
         return retStr;
     }
+    public String formatBoardForFile(boolean isComputerWhite, int depth) {
+        String retStr = "";
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                retStr += ((board[i][j] != null) ? board[i][j] : " ");
+            }
+        }
+        boolean isWhite = isComputerWhite;
+        if (depth % 2 == 1) {
+            isWhite = !isWhite;
+        }
+        return retStr + isWhite;
+    }
     public boolean isEarlyGame(int moveCounter) {
         return moveCounter < 18 || (whitePieces.size() > 14 && blackPieces.size() > 14);
     }

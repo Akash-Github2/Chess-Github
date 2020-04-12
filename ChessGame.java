@@ -5,14 +5,14 @@
 import java.io.*;
 import java.util.*;
 public class ChessGame {
-    public static int recur = 0;
+    private static int recur = 0;
+    private static int recurSaved = 0;
     public static int moveCounter = 0;
-    public static TreeMap<String, Integer> boardFreq = new TreeMap<>(); //Checks for 3 fold rule (tie)
-    public static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); //Overall
-    public static TreeMap<String, MoveVal> bestMoveLog4 = new TreeMap<>(); //Log for Depth 4
-    public static TreeMap<String, MoveVal> bestMoveLog2 = new TreeMap<>(); //Log for Depth 2
-    public static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
-    public static int mainDepth = 4;
+    private static TreeMap<String, Integer> boardFreq = new TreeMap<>(); //Checks for 3 fold rule (tie)
+    private static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); //Overall
+    private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); //0:D2; 1:D3; 2:D4; 3:D5;... 
+    private static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
+    private static int mainDepth = 4;
     public static void main(String args[]) { //Driver
       if (!System.getProperty("os.name").equals("Mac OS X")) {
         folder = "E:/Akash/Java Projects/Chess-Github/";
@@ -20,8 +20,9 @@ public class ChessGame {
       Board chessBoard = new Board();
       System.out.print("\033[H\033[2J"); //Clear Console Command
       clearMoveOutputFile();
-      fillBestMoveLog("moveTB-D4.txt", bestMoveLog, bestMoveLog4, true);
-      //fillBestMoveLog("moveTB-D2.txt", bestMoveLog, bestMoveLog2, false);//true for testing only
+      fillBestMoveLog("moveTB-D4.txt", true);
+      fillBestMoveLog("moveTB-D3.txt", false); //true for testing only depth 3 only
+      fillBestMoveLog("moveTB-D2.txt", false); //true for testing only depth 2 only
       playGame(chessBoard);
     }
     public static void playGame(Board board) {
@@ -42,8 +43,8 @@ public class ChessGame {
                 gamePhase = " (End Game)";
             }
             if (currPlayerIsWhite) {
-                //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                callAI(gamePhase, board, currPlayerIsWhite, "White");
+                parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
+                //callAI(gamePhase, board, currPlayerIsWhite, "White");
             } else {
                 //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
                 callAI(gamePhase, board, currPlayerIsWhite, "Black");
@@ -65,6 +66,10 @@ public class ChessGame {
     }
     public static double findBestMove(Board board, boolean isComputerTurn, int depth, int maxDepth, int tempMoveCounter, boolean isComputerWhite) {
         recur++;
+        if (depth > 0 && depth < maxDepth - 1 && bestMoveLogList.get(maxDepth-depth-2).get(board.formatBoardForFile(isComputerWhite, depth)) != null && moveCounter > 2) {
+            recurSaved++;
+            return bestMoveLogList.get(maxDepth-depth-2).get(board.formatBoardForFile(isComputerWhite, depth)).val;
+        }
         boolean isWhite = true;
         if ((isComputerTurn && !isComputerWhite) || (!isComputerTurn && isComputerWhite)) {
             isWhite = false;
@@ -88,7 +93,7 @@ public class ChessGame {
         ArrayList<String> allPossibleMoves = board.retAllPossibleMoves(isWhite);
         HashMap<String, Double> tiedOptMoves = new HashMap<>();
         double bestSumOver1 = 0;
-        if (!(depth == 0 && (allPossibleMoves.size() == 1 || bestMoveLog.get(board.toString() + isComputerWhite + "\n") != null))) {
+        if (!(depth == 0 && (allPossibleMoves.size() == 1 || bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null))) {
             if (depth < maxDepth) {
                 for (int i = 0; i < allPossibleMoves.size(); i++) {
                     
@@ -190,9 +195,9 @@ public class ChessGame {
             }
         }
         boolean isAlreadyFound = false;
-        if (bestMoveLog.get(board.toString() + isComputerWhite + "\n") != null) {
-            optMove = bestMoveLog.get(board.toString() + isComputerWhite + "\n").move;
-            optVal = bestMoveLog.get(board.toString() + isComputerWhite + "\n").val;
+        if (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null) {
+            optMove = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).move;
+            optVal = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).val;
             isAlreadyFound = true;
         }
         if (!isAlreadyFound) {
@@ -209,19 +214,12 @@ public class ChessGame {
         if (depth == 0) {
             String fileName = folder + "moveTB-D" + mainDepth + ".txt";
             boolean isAlreadyInIndivFile = true;
-            if (mainDepth == 4) {
-                if (bestMoveLog4.get(board.toString() + isComputerWhite + "\n") == null) {
-                    bestMoveLog4.put(board.toString() + isComputerWhite + "\n", new MoveVal(optMove, optVal));
-                    isAlreadyInIndivFile = false;
-                }
-            } else if (mainDepth == 2) {
-                if (bestMoveLog2.get(board.toString() + isComputerWhite + "\n") == null) {
-                    bestMoveLog2.put(board.toString() + isComputerWhite + "\n", new MoveVal(optMove, optVal));
-                    isAlreadyInIndivFile = false;
-                }
+            if (bestMoveLogList.get(mainDepth-2).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
+                bestMoveLogList.get(mainDepth-2).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
+                isAlreadyInIndivFile = false;
             }
             if (!isAlreadyFound) {
-                bestMoveLog.put(board.toString() + isComputerWhite + "\n", new MoveVal(optMove, optVal));
+                bestMoveLog.put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
             }
             if (!isAlreadyInIndivFile) {
                 try{
@@ -230,13 +228,12 @@ public class ChessGame {
                     if (file.length() != 0) {
                         writer.write("\n");
                     }
-                    writer.write(board.toString() + isComputerWhite + "\n" + optMove + "\n" + rounded(optVal));
+                    writer.write(board.formatBoardForFile(isComputerWhite, depth) + "\n" + optMove + " " + rounded(optVal));
                     writer.close();
                 }catch(Exception e) {
                     System.out.println("FILE ERROR");
                 }
             }
-
             int initI = Integer.parseInt(optMove.substring(0,1));
             int initJ = Integer.parseInt(optMove.substring(2,3));
             int finI = Integer.parseInt(optMove.substring(5,6));
@@ -261,11 +258,37 @@ public class ChessGame {
             if (board.movesSinceNoCaptureOrPawn != 0) {
                 System.out.println("Moves Since No Capture/Pawn Mvmt: " + board.movesSinceNoCaptureOrPawn);
             }
+            System.out.println("Size of Overall TB: " + bestMoveLog.size());
+            System.out.println("Size of TB D-2: " + bestMoveLogList.get(0).size());
+            System.out.println("Size of TB D-3: " + bestMoveLogList.get(1).size());
+            System.out.println("Size of TB D-4: " + bestMoveLogList.get(2).size());
+            System.out.println("Recursions Saved: " + recurSaved);
             //appendToFile(initI, initJ, finI, finJ);
             if (boardFreq.get(board.toString()) == null) {
                 boardFreq.put(board.toString(), 1);
             } else {
                 boardFreq.put(board.toString(), boardFreq.get(board.toString()) + 1);
+            }
+        }
+        if (depth > 0 && depth < maxDepth - 1 && moveCounter > 2) {
+            String fileName = folder + "moveTB-D" + (maxDepth - depth) + ".txt";
+            boolean isAlreadyInIndivFile = true;
+            if (bestMoveLogList.get(maxDepth-depth-2).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
+                bestMoveLogList.get(maxDepth-depth-2).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
+                isAlreadyInIndivFile = false;
+            }
+            if (!isAlreadyInIndivFile) {
+                try{
+                    File file = new File(fileName);
+                    FileWriter writer = new FileWriter(file, true);
+                    if (file.length() != 0) {
+                        writer.write("\n");
+                    }
+                    writer.write(board.formatBoardForFile(isComputerWhite, depth) + "\n" + optMove + " " + rounded(optVal));
+                    writer.close();
+                }catch(Exception e) {
+                    System.out.println("FILE ERROR");
+                }
             }
         }
         return optVal;
@@ -342,24 +365,22 @@ public class ChessGame {
             System.out.println("FILE ERROR");
         }
     }
-    public static void fillBestMoveLog(String filename, TreeMap<String, MoveVal> bestMoveLog, TreeMap<String, MoveVal> bestMoveLogIndiv, boolean checkToAdd) {
+    public static void fillBestMoveLog(String filename, boolean checkToAdd) {
+        TreeMap<String, MoveVal> bestMoveLogIndiv = new TreeMap<>();
         try {
             File myObj = new File(folder + filename);
             Scanner reader = new Scanner(myObj);
             while (reader.hasNextLine()) {
-                String boardStr = "";
-                for (int i = 0; i < 18; i++) {
-                    boardStr += reader.nextLine() + "\n";
-                }
-                String move = reader.nextLine();
-                double val = Double.parseDouble(reader.nextLine());
+                String boardStr = reader.nextLine();
+                String nextLine = reader.nextLine();
+                String move = nextLine.split(" ")[0];
+                double val = Double.parseDouble(nextLine.split(" ")[1]);
                 if (bestMoveLog.get(boardStr) == null && checkToAdd) {
                     bestMoveLog.put(boardStr, new MoveVal(move, val));
                 }
-                if (bestMoveLogIndiv.get(boardStr) == null) {
-                    bestMoveLogIndiv.put(boardStr, new MoveVal(move, val));
-                }
+                bestMoveLogIndiv.put(boardStr, new MoveVal(move, val));
             }
+            bestMoveLogList.add(0, bestMoveLogIndiv);
             reader.close();
         } catch (FileNotFoundException e) { 
             System.out.println("File Error");
