@@ -104,7 +104,7 @@ public class ChessGame {
         ArrayList<String> allPossibleMoves = board.retAllPossibleMoves(isWhite);
         HashMap<String, Double> tiedOptMoves = new HashMap<>();
         double bestSumOver1 = 0;
-        if (!(depth == 0 && (allPossibleMoves.size() == 1 || bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null))) {
+        if (!(depth == 0 && (allPossibleMoves.size() == 1 || (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null/* && !isComputerWhite*/)))) {
             if (depth < maxDepth) {
                 for (int i = 0; i < allPossibleMoves.size(); i++) {
                     
@@ -204,7 +204,7 @@ public class ChessGame {
             }
         }
         boolean isAlreadyFound = false;
-        if (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null) {
+        if (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null/* && !isComputerWhite*/) {
             optMove = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).move;
             optVal = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).val;
             isAlreadyFound = true;
