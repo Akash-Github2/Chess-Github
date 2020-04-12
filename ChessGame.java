@@ -43,8 +43,8 @@ public class ChessGame {
                 gamePhase = " (End Game)";
             }
             if (currPlayerIsWhite) {
-                parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                //callAI(gamePhase, board, currPlayerIsWhite, "White");
+                //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
+                callAI(gamePhase, board, currPlayerIsWhite, "White");
             } else {
                 //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
                 callAI(gamePhase, board, currPlayerIsWhite, "Black");
@@ -122,18 +122,16 @@ public class ChessGame {
                     }
                     double diff = newValDiff - origValDiff;
                     double num = 2.0;
-                    if (tempMoveCounter > 60) {
+                    if (tempMoveCounter > 50) {
                         num = 6.0;
-                    } else if (tempMoveCounter > 50) {
-                        num = 5.0;
                     } else if (tempMoveCounter > 40) {
-                        num = 4.0;
+                        num = 4.8;
                     } else if (tempMoveCounter > 35) {
-                        num = 3.3;
+                        num = 3.8;
                     } else if (tempMoveCounter > 30) {
-                        num = 3.0;
+                        num = 3.3;
                     } else if (tempMoveCounter > 25) {
-                        num = 2.6;
+                        num = 2.8;
                     } else if (tempMoveCounter > 18) {
                         num = 2.4;
                     } else if (tempMoveCounter > 12) {
@@ -143,7 +141,7 @@ public class ChessGame {
                     if (!isComputerTurn) {
                         shouldReturn = diff - num > optVal;
                     }
-                    if (shouldReturn && tempMoveCounter < 75) {
+                    if (shouldReturn && tempMoveCounter < 60) {
                         //reset it
                         board.fullyResetMove(initI, initJ, finI, finJ, !isWhite, didPawnPromo, origPiece);
                         if (boardFreq.get(triedBoard) == 1) {
