@@ -12,8 +12,9 @@ public class ChessGame {
     private static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); //Overall
     private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); //0:D2; 1:D3; 2:D4; 3:D5;... 
     private static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
-    private static int mainDepth = 4;
-    private static ArrayList<Double[]> depthValToSkip = new ArrayList<>();//2,3,4,5...
+    private static int whiteDepth = 4;
+    private static int blackDepth = 4;
+    private static ArrayList<Double[]> depthValToSkip = new ArrayList<>(); //2,3,4,5...
     public static void main(String args[]) { //Driver
       if (!System.getProperty("os.name").equals("Mac OS X")) {
         folder = "E:/Akash/Java Projects/Chess-Github/";
@@ -53,14 +54,14 @@ public class ChessGame {
                 gamePhase = " (End Game)";
             }
             if (currPlayerIsWhite) {
-                parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                //callAI(gamePhase, board, currPlayerIsWhite, "White");
+                //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
+                callAIWhite(gamePhase, board);
             } else {
                 //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                callAI(gamePhase, board, currPlayerIsWhite, "Black");
+                callAIBlack(gamePhase, board);
             }
             if (board.isCheckMate(!currPlayerIsWhite)) {
-                System.out.println((currPlayerIsWhite) ? "You Win!" : "Computer Wins!");
+                System.out.println((currPlayerIsWhite) ? "White Wins!" : "Black Wins!");
             } else if (board.isTie(!currPlayerIsWhite, boardFreq)) {
                 System.out.println("Tie game!");
             }
@@ -131,21 +132,21 @@ public class ChessGame {
                         newValDiff *= -1;
                     }
                     double diff = newValDiff - origValDiff;
-                    double num = depthValToSkip.get(mainDepth - 2)[0];
+                    double num = depthValToSkip.get(maxDepth - 2)[0];
                     if (tempMoveCounter > 50) {
-                        num = depthValToSkip.get(mainDepth - 2)[7];
+                        num = depthValToSkip.get(maxDepth - 2)[7];
                     } else if (tempMoveCounter > 40) {
-                        num = depthValToSkip.get(mainDepth - 2)[6];
+                        num = depthValToSkip.get(maxDepth - 2)[6];
                     } else if (tempMoveCounter > 35) {
-                        num = depthValToSkip.get(mainDepth - 2)[5];
+                        num = depthValToSkip.get(maxDepth - 2)[5];
                     } else if (tempMoveCounter > 30) {
-                        num = depthValToSkip.get(mainDepth - 2)[4];
+                        num = depthValToSkip.get(maxDepth - 2)[4];
                     } else if (tempMoveCounter > 25) {
-                        num = depthValToSkip.get(mainDepth - 2)[3];
+                        num = depthValToSkip.get(maxDepth - 2)[3];
                     } else if (tempMoveCounter > 18) {
-                        num = depthValToSkip.get(mainDepth - 2)[2];
+                        num = depthValToSkip.get(maxDepth - 2)[2];
                     } else if (tempMoveCounter > 12) {
-                        num = depthValToSkip.get(mainDepth - 2)[1];
+                        num = depthValToSkip.get(maxDepth - 2)[1];
                     }
                     boolean shouldReturn = diff + num < optVal;
                     if (!isComputerTurn) {
@@ -320,14 +321,26 @@ public class ChessGame {
         }
         // appendToFile(initI, initJ, finI, finJ);
     }
-    public static void callAI(String gamePhase, Board board, boolean currPlayerIsWhite, String player) {
-        System.out.println(player + "'s Turn : Move #" + moveCounter + gamePhase);
+    public static void callAIWhite(String gamePhase, Board board) {
+        System.out.println("White's Turn : Move #" + moveCounter + gamePhase);
         int tempMoveCounter = moveCounter;
-        int depth = mainDepth;
+        int depth = whiteDepth;
         // if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 75) {
         //     depth = depth2;
         // }
-        findBestMove(board, true, 0, depth, tempMoveCounter, currPlayerIsWhite);
+        findBestMove(board, true, 0, depth, tempMoveCounter, true);
+        System.out.println("Num Recursions: " + recur);
+        System.out.println("------------------------");
+        recur = 0;
+    }
+    public static void callAIBlack(String gamePhase, Board board) {
+        System.out.println("Black's Turn : Move #" + moveCounter + gamePhase);
+        int tempMoveCounter = moveCounter;
+        int depth = blackDepth;
+        // if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 75) {
+        //     depth = depth2;
+        // }
+        findBestMove(board, true, 0, depth, tempMoveCounter, false);
         System.out.println("Num Recursions: " + recur);
         System.out.println("------------------------");
         recur = 0;
