@@ -12,7 +12,7 @@ public class ChessGame {
     private static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); //Overall
     private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); //0:D2; 1:D3; 2:D4; 3:D5;... 
     private static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
-    private static int mainDepth = 4;
+    private static int mainDepth = 5;
     private static ArrayList<Double[]> depthValToSkip = new ArrayList<>();//2,3,4,5...
     public static void main(String args[]) { //Driver
       if (!System.getProperty("os.name").equals("Mac OS X")) {
@@ -29,8 +29,8 @@ public class ChessGame {
       Board chessBoard = new Board();
       System.out.print("\033[H\033[2J"); //Clear Console Command
       clearMoveOutputFile();
-      fillBestMoveLog("moveTB-D5.txt", false); //true for testing depth 5 only
-      fillBestMoveLog("moveTB-D4.txt", true); //true for real deal (not for testing to collect data though)
+      fillBestMoveLog("moveTB-D5.txt", true); //true for testing depth 5 only
+      fillBestMoveLog("moveTB-D4.txt", false); //true for real deal (not for testing to collect data though)
       fillBestMoveLog("moveTB-D3.txt", false); //true for testing depth 3 only
       fillBestMoveLog("moveTB-D2.txt", false); //true for testing depth 2 only
       playGame(chessBoard);
@@ -53,8 +53,8 @@ public class ChessGame {
                 gamePhase = " (End Game)";
             }
             if (currPlayerIsWhite) {
-                parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                //callAI(gamePhase, board, currPlayerIsWhite, "White");
+                //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
+                callAI(gamePhase, board, currPlayerIsWhite, "White");
             } else {
                 //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
                 callAI(gamePhase, board, currPlayerIsWhite, "Black");
