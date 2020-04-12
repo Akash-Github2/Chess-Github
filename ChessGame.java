@@ -13,16 +13,26 @@ public class ChessGame {
     private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); //0:D2; 1:D3; 2:D4; 3:D5;... 
     private static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
     private static int mainDepth = 4;
+    private static ArrayList<Double[]> depthValToSkip = new ArrayList<>();//2,3,4,5...
     public static void main(String args[]) { //Driver
       if (!System.getProperty("os.name").equals("Mac OS X")) {
         folder = "E:/Akash/Java Projects/Chess-Github/";
       }
+      Double[] depth2valToSkip = {2.0, 2.2, 2.4, 2.7, 3.0, 3.4, 4.0, 4.5};
+      Double[] depth3valToSkip = {2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 5.5};
+      Double[] depth4valToSkip = {2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 6.0};
+      Double[] depth5valToSkip = {2.5, 2.8, 3.0, 3.5, 3.9, 4.5, 5.4, 6.8};
+      depthValToSkip.add(depth2valToSkip);
+      depthValToSkip.add(depth3valToSkip);
+      depthValToSkip.add(depth4valToSkip);
+      depthValToSkip.add(depth5valToSkip);
       Board chessBoard = new Board();
       System.out.print("\033[H\033[2J"); //Clear Console Command
       clearMoveOutputFile();
-      fillBestMoveLog("moveTB-D4.txt", true);
-      fillBestMoveLog("moveTB-D3.txt", false); //true for testing only depth 3 only
-      fillBestMoveLog("moveTB-D2.txt", false); //true for testing only depth 2 only
+      fillBestMoveLog("moveTB-D5.txt", false); //true for testing depth 5 only
+      fillBestMoveLog("moveTB-D4.txt", true); //true for real deal (not for testing to collect data though)
+      fillBestMoveLog("moveTB-D3.txt", false); //true for testing depth 3 only
+      fillBestMoveLog("moveTB-D2.txt", false); //true for testing depth 2 only
       playGame(chessBoard);
     }
     public static void playGame(Board board) {
@@ -43,8 +53,8 @@ public class ChessGame {
                 gamePhase = " (End Game)";
             }
             if (currPlayerIsWhite) {
-                //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                callAI(gamePhase, board, currPlayerIsWhite, "White");
+                parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
+                //callAI(gamePhase, board, currPlayerIsWhite, "White");
             } else {
                 //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
                 callAI(gamePhase, board, currPlayerIsWhite, "Black");
@@ -121,21 +131,21 @@ public class ChessGame {
                         newValDiff *= -1;
                     }
                     double diff = newValDiff - origValDiff;
-                    double num = 2.0;
+                    double num = depthValToSkip.get(mainDepth - 2)[0];
                     if (tempMoveCounter > 50) {
-                        num = 6.0;
+                        num = depthValToSkip.get(mainDepth - 2)[7];
                     } else if (tempMoveCounter > 40) {
-                        num = 4.8;
+                        num = depthValToSkip.get(mainDepth - 2)[6];
                     } else if (tempMoveCounter > 35) {
-                        num = 3.8;
+                        num = depthValToSkip.get(mainDepth - 2)[5];
                     } else if (tempMoveCounter > 30) {
-                        num = 3.3;
+                        num = depthValToSkip.get(mainDepth - 2)[4];
                     } else if (tempMoveCounter > 25) {
-                        num = 2.8;
+                        num = depthValToSkip.get(mainDepth - 2)[3];
                     } else if (tempMoveCounter > 18) {
-                        num = 2.4;
+                        num = depthValToSkip.get(mainDepth - 2)[2];
                     } else if (tempMoveCounter > 12) {
-                        num = 2.2;
+                        num = depthValToSkip.get(mainDepth - 2)[1];
                     }
                     boolean shouldReturn = diff + num < optVal;
                     if (!isComputerTurn) {
@@ -209,15 +219,12 @@ public class ChessGame {
                 }
             }
         }
-        if (depth == 0) {
-            String fileName = folder + "moveTB-D" + mainDepth + ".txt";
+        if (depth >= 0 && depth < maxDepth - 1 && (depth == 0 || moveCounter > 2)) {
+            String fileName = folder + "moveTB-D" + (maxDepth - depth) + ".txt";
             boolean isAlreadyInIndivFile = true;
-            if (bestMoveLogList.get(mainDepth-2).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
-                bestMoveLogList.get(mainDepth-2).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
+            if (bestMoveLogList.get(maxDepth-depth-2).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
+                bestMoveLogList.get(maxDepth-depth-2).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
                 isAlreadyInIndivFile = false;
-            }
-            if (!isAlreadyFound) {
-                bestMoveLog.put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
             }
             if (!isAlreadyInIndivFile) {
                 try{
@@ -231,6 +238,11 @@ public class ChessGame {
                 }catch(Exception e) {
                     System.out.println("FILE ERROR");
                 }
+            }
+        }
+        if (depth == 0) {
+            if (!isAlreadyFound) {
+                bestMoveLog.put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
             }
             int initI = Integer.parseInt(optMove.substring(0,1));
             int initJ = Integer.parseInt(optMove.substring(2,3));
@@ -260,33 +272,13 @@ public class ChessGame {
             System.out.println("Size of TB D-2: " + bestMoveLogList.get(0).size());
             System.out.println("Size of TB D-3: " + bestMoveLogList.get(1).size());
             System.out.println("Size of TB D-4: " + bestMoveLogList.get(2).size());
+            System.out.println("Size of TB D-5: " + bestMoveLogList.get(3).size());
             System.out.println("Recursions Saved: " + recurSaved);
             //appendToFile(initI, initJ, finI, finJ);
             if (boardFreq.get(board.toString()) == null) {
                 boardFreq.put(board.toString(), 1);
             } else {
                 boardFreq.put(board.toString(), boardFreq.get(board.toString()) + 1);
-            }
-        }
-        if (depth > 0 && depth < maxDepth - 1 && moveCounter > 2) {
-            String fileName = folder + "moveTB-D" + (maxDepth - depth) + ".txt";
-            boolean isAlreadyInIndivFile = true;
-            if (bestMoveLogList.get(maxDepth-depth-2).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
-                bestMoveLogList.get(maxDepth-depth-2).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
-                isAlreadyInIndivFile = false;
-            }
-            if (!isAlreadyInIndivFile) {
-                try{
-                    File file = new File(fileName);
-                    FileWriter writer = new FileWriter(file, true);
-                    if (file.length() != 0) {
-                        writer.write("\n");
-                    }
-                    writer.write(board.formatBoardForFile(isComputerWhite, depth) + "\n" + optMove + " " + rounded(optVal));
-                    writer.close();
-                }catch(Exception e) {
-                    System.out.println("FILE ERROR");
-                }
             }
         }
         return optVal;
@@ -326,7 +318,7 @@ public class ChessGame {
         } else {
             boardFreq.put(board.toString(), boardFreq.get(board.toString()) + 1);
         }
-        appendToFile(initI, initJ, finI, finJ);
+        // appendToFile(initI, initJ, finI, finJ);
     }
     public static void callAI(String gamePhase, Board board, boolean currPlayerIsWhite, String player) {
         System.out.println(player + "'s Turn : Move #" + moveCounter + gamePhase);
