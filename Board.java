@@ -530,7 +530,7 @@ public class Board {
         if (depth % 2 == 1) {
             isWhite = !isWhite;
         }
-        return retStr + isWhite;
+        return retStr + ((isWhite) ? "1" : "0");
     }
     public boolean isEarlyGame(int moveCounter) {
         return moveCounter < 18 || (whitePieces.size() > 14 && blackPieces.size() > 14);

@@ -10,7 +10,7 @@ public class ChessGame {
     public static int moveCounter = 0;
     private static TreeMap<String, Integer> boardFreq = new TreeMap<>(); //Checks for 3 fold rule (tie)
     private static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); //Overall
-    private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); //0:D2; 1:D3; 2:D4; 3:D5;... 
+    private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); //0:D3; 1:D4; 2:D5;... 
     private static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
     private static int whiteDepth = 4;
     private static int blackDepth = 4;
@@ -23,17 +23,19 @@ public class ChessGame {
       Double[] depth3valToSkip = {2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 5.5};
       Double[] depth4valToSkip = {2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 6.0};
       Double[] depth5valToSkip = {2.5, 2.8, 3.0, 3.5, 3.9, 4.5, 5.4, 6.8};
+      Double[] depth6valToSkip = {3.0, 3.8, 4.4, 5.1, 5.8, 6.3, 7.4, 8.5};
       depthValToSkip.add(depth2valToSkip);
       depthValToSkip.add(depth3valToSkip);
       depthValToSkip.add(depth4valToSkip);
       depthValToSkip.add(depth5valToSkip);
+      depthValToSkip.add(depth6valToSkip);
       Board chessBoard = new Board();
       System.out.print("\033[H\033[2J"); //Clear Console Command
-      clearMoveOutputFile();
-      fillBestMoveLog("moveTB-D5.txt", false); //true for testing depth 5 only
+    //   clearMoveOutputFile();
+    //   fillBestMoveLog("moveTB-D6.txt", false); //true for real deal
+    //   fillBestMoveLog("moveTB-D5.txt", false); //true for testing depth 5 only
       fillBestMoveLog("moveTB-D4.txt", true); //true for real deal (not for testing to collect data though)
       fillBestMoveLog("moveTB-D3.txt", false); //true for testing depth 3 only
-      fillBestMoveLog("moveTB-D2.txt", false); //true for testing depth 2 only
       playGame(chessBoard);
     }
     public static void playGame(Board board) {
@@ -77,9 +79,9 @@ public class ChessGame {
     }
     public static double findBestMove(Board board, boolean isComputerTurn, int depth, int maxDepth, int tempMoveCounter, boolean isComputerWhite) {
         recur++;
-        if (depth > 0 && depth < maxDepth - 1 && bestMoveLogList.get(maxDepth-depth-2).get(board.formatBoardForFile(isComputerWhite, depth)) != null && moveCounter > 2) {
+        if (depth > 0 && depth < maxDepth - 2 && bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) != null && moveCounter > 2) {
             recurSaved++;
-            return bestMoveLogList.get(maxDepth-depth-2).get(board.formatBoardForFile(isComputerWhite, depth)).val;
+            return bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)).val;
         }
         boolean isWhite = true;
         if ((isComputerTurn && !isComputerWhite) || (!isComputerTurn && isComputerWhite)) {
@@ -104,7 +106,7 @@ public class ChessGame {
         ArrayList<String> allPossibleMoves = board.retAllPossibleMoves(isWhite);
         HashMap<String, Double> tiedOptMoves = new HashMap<>();
         double bestSumOver1 = 0;
-        if (!(depth == 0 && (allPossibleMoves.size() == 1 || (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null/* && !isComputerWhite*/)))) {
+        if (!(depth == 0 && (allPossibleMoves.size() == 1 || (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null)))) {
             if (depth < maxDepth) {
                 for (int i = 0; i < allPossibleMoves.size(); i++) {
                     
@@ -220,11 +222,11 @@ public class ChessGame {
                 }
             }
         }
-        if (depth >= 0 && depth < maxDepth - 1 && (depth == 0 || moveCounter > 2)) {
+        if (depth >= 0 && depth < maxDepth - 2 && (depth == 0 || moveCounter > 2)) {
             String fileName = folder + "moveTB-D" + (maxDepth - depth) + ".txt";
             boolean isAlreadyInIndivFile = true;
-            if (bestMoveLogList.get(maxDepth-depth-2).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
-                bestMoveLogList.get(maxDepth-depth-2).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
+            if (bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
+                bestMoveLogList.get(maxDepth-depth-3).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
                 isAlreadyInIndivFile = false;
             }
             if (!isAlreadyInIndivFile) {
@@ -234,7 +236,7 @@ public class ChessGame {
                     if (file.length() != 0) {
                         writer.write("\n");
                     }
-                    writer.write(board.formatBoardForFile(isComputerWhite, depth) + "\n" + optMove + " " + rounded(optVal));
+                    writer.write(board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + rounded(optVal));
                     writer.close();
                 }catch(Exception e) {
                     System.out.println("FILE ERROR");
@@ -270,11 +272,15 @@ public class ChessGame {
                 System.out.println("Moves Since No Capture/Pawn Mvmt: " + board.movesSinceNoCaptureOrPawn);
             }
             System.out.println("Size of Overall TB: " + bestMoveLog.size());
-            System.out.println("Size of TB D-2: " + bestMoveLogList.get(0).size());
-            System.out.println("Size of TB D-3: " + bestMoveLogList.get(1).size());
-            System.out.println("Size of TB D-4: " + bestMoveLogList.get(2).size());
-            System.out.println("Size of TB D-5: " + bestMoveLogList.get(3).size());
-            System.out.println("Recursions Saved: " + recurSaved);
+            System.out.println("Size of TB D-3: " + bestMoveLogList.get(0).size());
+            System.out.println("Size of TB D-4: " + bestMoveLogList.get(1).size());
+            // if (maxDepth >= 5) {
+            //     System.out.println("Size of TB D-5: " + bestMoveLogList.get(2).size());
+            //     if (bestMoveLogList.get(3).size() > 5) {
+            //         System.out.println("Size of TB D-6: " + bestMoveLogList.get(3).size());
+            //     }
+            // }
+            // System.out.println("Recursions Saved: " + recurSaved);
             //appendToFile(initI, initJ, finI, finJ);
             if (boardFreq.get(board.toString()) == null) {
                 boardFreq.put(board.toString(), 1);
@@ -374,8 +380,9 @@ public class ChessGame {
             File myObj = new File(folder + filename);
             Scanner reader = new Scanner(myObj);
             while (reader.hasNextLine()) {
-                String boardStr = reader.nextLine();
-                String nextLine = reader.nextLine();
+                String line = reader.nextLine();
+                String boardStr = line.split(":")[0];
+                String nextLine = line.split(":")[1];
                 String move = nextLine.split(" ")[0];
                 double val = Double.parseDouble(nextLine.split(" ")[1]);
                 if (bestMoveLog.get(boardStr) == null && checkToAdd) {
