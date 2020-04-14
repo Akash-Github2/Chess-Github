@@ -1,3 +1,4 @@
+
 /**
  * @author Akash Pulinthanathu
  * Chess Game with Advanced AI
@@ -7,48 +8,50 @@ import java.util.*;
 public class ChessGame {
     private static int recur = 0;
     private static int numSaved = 0;
+    private static int numSavedOverall = 0;
     public static int moveCounter = 0;
-    private static TreeMap<String, Integer> boardFreq = new TreeMap<>(); //Checks for 3 fold rule (tie)
-    private static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); //Overall
-    private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); //0:D3; 1:D4; 2:D5;... 
+    private static TreeMap<String, Integer> boardFreq = new TreeMap<>(); // Checks for 3 fold rule (tie)
+    private static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); // Overall
+    private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); // 0:D3; 1:D4; 2:D5;...
     private static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
     private static int whiteDepth = 4;
     private static int blackDepth = 4;
-    private static ArrayList<Double[]> depthValToSkip = new ArrayList<>(); //2,3,4,5...
-    public static void main(String args[]) { //Driver
-      if (!System.getProperty("os.name").equals("Mac OS X")) {
-        folder = "E:/Akash/Java Projects/Chess-Github/";
-      }
-      Double[] depth2valToSkip = {2.0, 2.2, 2.4, 2.7, 3.0, 3.4, 4.0, 4.5};
-      Double[] depth3valToSkip = {2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 5.5};
-      Double[] depth4valToSkip = {2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 6.0};
-      Double[] depth5valToSkip = {2.5, 2.8, 3.0, 3.5, 3.9, 4.5, 5.4, 6.8};
-      Double[] depth6valToSkip = {3.0, 3.8, 4.4, 5.1, 5.8, 6.3, 7.4, 8.5};
-      depthValToSkip.add(depth2valToSkip);
-      depthValToSkip.add(depth3valToSkip);
-      depthValToSkip.add(depth4valToSkip);
-      depthValToSkip.add(depth5valToSkip);
-      depthValToSkip.add(depth6valToSkip);
-      Board chessBoard = new Board();
-      System.out.print("\033[H\033[2J"); //Clear Console Command
-    //   clearMoveOutputFile();
-      fillBestMoveLog("moveTB-D6.txt", false); //true for real deal
-      fillBestMoveLog("moveTB-D5.txt", false); //true for testing depth 5 only
-      fillBestMoveLog("moveTB-D4.txt", true); //true for real deal
-      fillBestMoveLog("moveTB-D3.txt", false); //true for testing depth 3 only
-    //   DataTester a = new DataTester(folder, 3);
-    //   a.reportNumPieces();
-    //   DataTester b = new DataTester(folder, 4);
-    //   b.reportNumPieces();
-      playGame(chessBoard);
+    private static ArrayList<Double[]> depthValToSkip = new ArrayList<>(); // 2,3,4,5...
+    public static void main(String args[]) { // Driver
+        if (!System.getProperty("os.name").equals("Mac OS X")) {
+            folder = "E:/Akash/Java Projects/Chess-Github/";
+        }
+        Double[] depth2valToSkip = { 2.0, 2.2, 2.4, 2.7, 3.0, 3.4, 4.0, 4.5 };
+        Double[] depth3valToSkip = { 2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 5.5 };
+        Double[] depth4valToSkip = { 2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 6.0 };
+        Double[] depth5valToSkip = { 2.5, 2.8, 3.0, 3.5, 3.9, 4.5, 5.4, 6.8 };
+        Double[] depth6valToSkip = { 3.0, 3.8, 4.4, 5.1, 5.8, 6.3, 7.4, 8.5 };
+        depthValToSkip.add(depth2valToSkip);
+        depthValToSkip.add(depth3valToSkip);
+        depthValToSkip.add(depth4valToSkip);
+        depthValToSkip.add(depth5valToSkip);
+        depthValToSkip.add(depth6valToSkip);
+        Board chessBoard = new Board();
+        // DataTester a = new DataTester(folder, 3);
+        // a.reportNumPieces();
+        // DataTester b = new DataTester(folder, 4);
+        // b.reportNumPieces();
+        playGame(chessBoard);
     }
+
     public static void playGame(Board board) {
+        System.out.print("\033[H\033[2J"); // Clear Console Command
+        // clearMoveOutputFile();
+        fillBestMoveLog("moveTB-D6.txt", Math.max(whiteDepth, blackDepth) == 6); // true for real deal
+        fillBestMoveLog("moveTB-D5.txt", Math.max(whiteDepth, blackDepth) == 5); // true for testing depth 5 only
+        fillBestMoveLog("moveTB-D4.txt", Math.max(whiteDepth, blackDepth) == 4); // true for real deal
+        fillBestMoveLog("moveTB-D3.txt", Math.max(whiteDepth, blackDepth) == 3); // true for testing depth 3 only
         System.out.println("Welcome to My Chess Game!");
         Scanner br = new Scanner(System.in);
         boolean currPlayerIsWhite = true;
         System.out.println("Initial Game Board:");
         System.out.println(board);
-        while(true) {
+        while (true) {
             moveCounter++;
             board.printAllPossibleMoves(currPlayerIsWhite);
             String gamePhase = "";
@@ -60,11 +63,11 @@ public class ChessGame {
                 gamePhase = " (End Game)";
             }
             if (currPlayerIsWhite) {
-                //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                callAIWhite(gamePhase, board);
+                // parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
+                callAIWhite(gamePhase, board, Math.max(whiteDepth, blackDepth) == whiteDepth);
             } else {
-                //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                callAIBlack(gamePhase, board);
+                // parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
+                callAIBlack(gamePhase, board, Math.max(whiteDepth, blackDepth) == blackDepth);
             }
             if (board.isCheckMate(!currPlayerIsWhite)) {
                 System.out.println((currPlayerIsWhite) ? "White Wins!" : "Black Wins!");
@@ -80,11 +83,21 @@ public class ChessGame {
             System.out.println(board);
             currPlayerIsWhite = !currPlayerIsWhite;
         }
+        moveCounter = 0;
+        bestMoveLogList.clear();
+        boardFreq.clear();
+        bestMoveLog.clear();
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
-    public static double findBestMove(Board board, boolean isComputerTurn, int depth, int maxDepth, int tempMoveCounter, boolean isComputerWhite) {
+    public static double findBestMove(Board board, boolean isComputerTurn, int depth, int maxDepth, int tempMoveCounter, boolean isComputerWhite, boolean isAllowedToAccessData) {
         recur++;
         if (depth > 0 && depth < maxDepth - 2 && bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) != null && moveCounter > 2 && (boardFreq.get(board.toString()) == null || boardFreq.get(board.toString()) < 2)) {
             numSaved++;
+            numSavedOverall++;
             return bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)).val;
         }
         boolean isWhite = true;
@@ -110,7 +123,7 @@ public class ChessGame {
         ArrayList<String> allPossibleMoves = board.retAllPossibleMoves(isWhite);
         HashMap<String, Double> tiedOptMoves = new HashMap<>();
         double bestSumOver1 = 0;
-        if (!(depth == 0 && (allPossibleMoves.size() == 1 || (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null && (boardFreq.get(board.toString()) == null || boardFreq.get(board.toString()) < 2) /* && isComputerWhite*/)))) {
+        if (!(depth == 0 && (allPossibleMoves.size() == 1 || (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null && (boardFreq.get(board.toString()) == null || boardFreq.get(board.toString()) < 2)  && isAllowedToAccessData)))) {
             if (depth < maxDepth) {
                 for (int i = 0; i < allPossibleMoves.size(); i++) {
                     int initI = Integer.parseInt(allPossibleMoves.get(i).substring(0,1));
@@ -157,7 +170,7 @@ public class ChessGame {
                     if (!isComputerTurn) {
                         shouldReturn = diff - num > optVal;
                     }
-                    if (shouldReturn && tempMoveCounter < 60 && !board.isAlmostCheckMate) {
+                    if (shouldReturn && tempMoveCounter < 60 && !board.whiteAlmostWins && !board.blackAlmostWins) {
                         //reset it
                         board.fullyResetMove(initI, initJ, finI, finJ, !isWhite, didPawnPromo, origPiece);
                         if (boardFreq.get(triedBoard) == 1) {
@@ -167,7 +180,7 @@ public class ChessGame {
                         }
                         continue;
                     }
-                    double n = findBestMove(board, !isComputerTurn, depth + 1, maxDepth, tempMoveCounter + 1, isComputerWhite) + diff;
+                    double n = findBestMove(board, !isComputerTurn, depth + 1, maxDepth, tempMoveCounter + 1, isComputerWhite, isAllowedToAccessData) + diff;
                     if (n > 800) {
                         n-=diff;
                     }
@@ -206,7 +219,7 @@ public class ChessGame {
             }
         }
         boolean isAlreadyFound = false;
-        if (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null && (boardFreq.get(board.toString()) == null || boardFreq.get(board.toString()) < 2)/* && isComputerWhite*/) {
+        if (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null && (boardFreq.get(board.toString()) == null || boardFreq.get(board.toString()) < 2) && isAllowedToAccessData) {
             optMove = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).move;
             optVal = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).val;
             isAlreadyFound = true;
@@ -266,8 +279,11 @@ public class ChessGame {
             System.out.println("Num Same Values: " + tiedOptMoves.size());
             System.out.println("Optimal Move: " + optMove);
             System.out.println("Optimal Value: " + ((allPossibleMoves.size() == 1) ? "N/A" : rounded(optVal)));
-            if (optVal >= 1000) {
-                board.isAlmostCheckMate = true;
+            if ((optVal >= 1000 && isComputerWhite) || (optVal < -900 && !isComputerWhite)) {
+                board.whiteAlmostWins = true;
+            }
+            if ((optVal >= 1000 && !isComputerWhite) || (optVal < -900 && isComputerWhite)) {
+                board.blackAlmostWins = true;
             }
             System.out.println("White Val: " + rounded(board.getWhiteVal(moveCounter)));
             System.out.println("Black Val: " + rounded(board.getBlackVal(moveCounter)));
@@ -284,6 +300,9 @@ public class ChessGame {
                 }
             }
             System.out.println("Num Saved: " + numSaved);
+            if (optVal >= 1000 || optVal < -900) {
+                System.out.println("Num Saved Overall: " + numSavedOverall);
+            }
             //appendToFile(initI, initJ, finI, finJ);
             if (boardFreq.get(board.toString()) == null) {
                 boardFreq.put(board.toString(), 1);
@@ -330,29 +349,31 @@ public class ChessGame {
         }
         // appendToFile(initI, initJ, finI, finJ);
     }
-    public static void callAIWhite(String gamePhase, Board board) {
+    public static void callAIWhite(String gamePhase, Board board, boolean isAllowedToAccessData) {
         System.out.println("White's Turn : Move #" + moveCounter + gamePhase);
         int tempMoveCounter = moveCounter;
         int depth = whiteDepth;
         // if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 75) {
         //     depth = depth2;
         // }
-        findBestMove(board, true, 0, depth, tempMoveCounter, true);
+        findBestMove(board, true, 0, depth, tempMoveCounter, true, isAllowedToAccessData);
         System.out.println("Num Recursions: " + recur);
         System.out.println("------------------------");
         recur = 0;
+        numSaved = 0;
     }
-    public static void callAIBlack(String gamePhase, Board board) {
+    public static void callAIBlack(String gamePhase, Board board, boolean isAllowedToAccessData) {
         System.out.println("Black's Turn : Move #" + moveCounter + gamePhase);
         int tempMoveCounter = moveCounter;
         int depth = blackDepth;
         // if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 75) {
         //     depth = depth2;
         // }
-        findBestMove(board, true, 0, depth, tempMoveCounter, false);
+        findBestMove(board, true, 0, depth, tempMoveCounter, false, isAllowedToAccessData);
         System.out.println("Num Recursions: " + recur);
         System.out.println("------------------------");
         recur = 0;
+        numSaved = 0;
     }
     public static void clearMoveOutputFile() {
         try{
