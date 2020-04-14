@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.*;
 public class ChessGame {
     private static int recur = 0;
-    private static int recurSaved = 0;
+    private static int numSaved = 0;
     public static int moveCounter = 0;
     private static TreeMap<String, Integer> boardFreq = new TreeMap<>(); //Checks for 3 fold rule (tie)
     private static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); //Overall
@@ -80,7 +80,7 @@ public class ChessGame {
     public static double findBestMove(Board board, boolean isComputerTurn, int depth, int maxDepth, int tempMoveCounter, boolean isComputerWhite) {
         recur++;
         // if (depth > 0 && depth < maxDepth - 2 && bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) != null && moveCounter > 2) {
-        //     recurSaved++;
+        //     numSaved++;
         //     return bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)).val;
         // }
         boolean isWhite = true;
@@ -279,7 +279,7 @@ public class ChessGame {
             //         System.out.println("Size of TB D-6: " + bestMoveLogList.get(3).size());
             //     }
             // }
-            // System.out.println("Recursions Saved: " + recurSaved);
+            // System.out.println("Num Saved: " + numSaved);
             //appendToFile(initI, initJ, finI, finJ);
             if (boardFreq.get(board.toString()) == null) {
                 boardFreq.put(board.toString(), 1);
