@@ -9,6 +9,7 @@ public class Board {
     public boolean bRookLHasMoved = false;
     public boolean wRookRHasMoved = false;
     public boolean bRookRHasMoved = false;
+    public boolean isAlmostCheckMate = false;
     public int movesSinceNoCaptureOrPawn = 0;
     public Board() {
         board = initializeBoard(board);
