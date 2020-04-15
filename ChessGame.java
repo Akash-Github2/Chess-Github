@@ -35,8 +35,8 @@ public class ChessGame {
         // b.reportNumPieces();
         Board chessBoard = new Board();
         playGame(chessBoard, 5, 5);
+        
     }
-
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
         System.out.print("\033[H\033[2J"); // Clear Console Command
         // clearMoveOutputFile();
@@ -149,35 +149,37 @@ public class ChessGame {
                         newValDiff *= -1;
                     }
                     double diff = newValDiff - origValDiff;
-                    double num = depthValToSkip.get(maxDepth - 2)[0];
-                    if (tempMoveCounter > 50) {
-                        num = depthValToSkip.get(maxDepth - 2)[7];
-                    } else if (tempMoveCounter > 40) {
-                        num = depthValToSkip.get(maxDepth - 2)[6];
-                    } else if (tempMoveCounter > 35) {
-                        num = depthValToSkip.get(maxDepth - 2)[5];
-                    } else if (tempMoveCounter > 30) {
-                        num = depthValToSkip.get(maxDepth - 2)[4];
-                    } else if (tempMoveCounter > 25) {
-                        num = depthValToSkip.get(maxDepth - 2)[3];
-                    } else if (tempMoveCounter > 18) {
-                        num = depthValToSkip.get(maxDepth - 2)[2];
-                    } else if (tempMoveCounter > 12) {
-                        num = depthValToSkip.get(maxDepth - 2)[1];
-                    }
-                    boolean shouldReturn = diff + num < optVal;
-                    if (!isComputerTurn) {
-                        shouldReturn = diff - num > optVal;
-                    }
-                    if (shouldReturn && tempMoveCounter < 60 && !board.whiteAlmostWins && !board.blackAlmostWins) {
-                        //reset it
-                        board.fullyResetMove(initI, initJ, finI, finJ, !isWhite, didPawnPromo, origPiece);
-                        if (boardFreq.get(triedBoard) == 1) {
-                            boardFreq.remove(triedBoard);
-                        } else {
-                            boardFreq.put(triedBoard, boardFreq.get(triedBoard) - 1);
+                    if (maxDepth >= 2) {
+                        double num = depthValToSkip.get(maxDepth - 2)[0];
+                        if (tempMoveCounter > 50) {
+                            num = depthValToSkip.get(maxDepth - 2)[7];
+                        } else if (tempMoveCounter > 40) {
+                            num = depthValToSkip.get(maxDepth - 2)[6];
+                        } else if (tempMoveCounter > 35) {
+                            num = depthValToSkip.get(maxDepth - 2)[5];
+                        } else if (tempMoveCounter > 30) {
+                            num = depthValToSkip.get(maxDepth - 2)[4];
+                        } else if (tempMoveCounter > 25) {
+                            num = depthValToSkip.get(maxDepth - 2)[3];
+                        } else if (tempMoveCounter > 18) {
+                            num = depthValToSkip.get(maxDepth - 2)[2];
+                        } else if (tempMoveCounter > 12) {
+                            num = depthValToSkip.get(maxDepth - 2)[1];
                         }
-                        continue;
+                        boolean shouldReturn = diff + num < optVal;
+                        if (!isComputerTurn) {
+                            shouldReturn = diff - num > optVal;
+                        }
+                        if (shouldReturn && tempMoveCounter < 60 && !board.whiteAlmostWins && !board.blackAlmostWins) {
+                            //reset it
+                            board.fullyResetMove(initI, initJ, finI, finJ, !isWhite, didPawnPromo, origPiece);
+                            if (boardFreq.get(triedBoard) == 1) {
+                                boardFreq.remove(triedBoard);
+                            } else {
+                                boardFreq.put(triedBoard, boardFreq.get(triedBoard) - 1);
+                            }
+                            continue;
+                        }
                     }
                     double n = findBestMove(board, !isComputerTurn, depth + 1, maxDepth, tempMoveCounter + 1, isComputerWhite, isAllowedToAccessData) + diff;
                     if (n > 800) {
@@ -214,7 +216,9 @@ public class ChessGame {
                     }
                 }
             } else {
-                return 0;
+                if (maxDepth != 0) {
+                    return 0;
+                }
             }
         }
         boolean isAlreadyFound = false;
@@ -223,7 +227,11 @@ public class ChessGame {
             optVal = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).val;
             isAlreadyFound = true;
         }
-        if (!isAlreadyFound) {
+        if (maxDepth == 0) {
+            int randInd = (int)(Math.random() * allPossibleMoves.size());
+            optMove = allPossibleMoves.get(randInd);
+        }
+        if (!isAlreadyFound && maxDepth != 0) {
             if (depth == 0 && allPossibleMoves.size() == 1) {
                 optMove = allPossibleMoves.get(0);
             } else {
@@ -256,7 +264,7 @@ public class ChessGame {
             }
         }
         if (depth == 0) {
-            if (!isAlreadyFound) {
+            if (!isAlreadyFound && maxDepth != 0) {
                 bestMoveLog.put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
             }
             int initI = Integer.parseInt(optMove.substring(0,1));
@@ -277,7 +285,7 @@ public class ChessGame {
             System.out.println("--------------");
             System.out.println("Num Same Values: " + tiedOptMoves.size());
             System.out.println("Optimal Move: " + optMove);
-            System.out.println("Optimal Value: " + ((allPossibleMoves.size() == 1) ? "N/A" : rounded(optVal)));
+            System.out.println("Optimal Value: " + ((allPossibleMoves.size() == 1 || maxDepth == 0) ? "N/A" : rounded(optVal)));
             if ((optVal >= 1000 && isComputerWhite) || (optVal < -900 && !isComputerWhite)) {
                 board.whiteAlmostWins = true;
             }
