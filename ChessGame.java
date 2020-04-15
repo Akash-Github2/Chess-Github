@@ -29,13 +29,10 @@ public class ChessGame {
         depthValToSkip.add(depth4valToSkip);
         depthValToSkip.add(depth5valToSkip);
         depthValToSkip.add(depth6valToSkip);
-        // DataTester a = new DataTester(folder, 3);
-        // a.reportNumPieces();
-        // DataTester b = new DataTester(folder, 4);
-        // b.reportNumPieces();
+        // DataTester data = new DataTester(folder);
+        // data.reportNumPieces();
         Board chessBoard = new Board();
         playGame(chessBoard, 5, 5);
-        
     }
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
         System.out.print("\033[H\033[2J"); // Clear Console Command
@@ -227,7 +224,7 @@ public class ChessGame {
             optVal = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).val;
             isAlreadyFound = true;
         }
-        if (maxDepth == 0) {
+        if (maxDepth == 0) { //returns a random move for max depth = 0
             int randInd = (int)(Math.random() * allPossibleMoves.size());
             optMove = allPossibleMoves.get(randInd);
         }
