@@ -34,21 +34,7 @@ public class ChessGame {
         // DataTester b = new DataTester(folder, 4);
         // b.reportNumPieces();
         Board chessBoard = new Board();
-        playGame(chessBoard, 4, 4);
-        Board chessBoard2 = new Board();
-        playGame(chessBoard2, 3, 3);
-        Board chessBoard3 = new Board();
-        playGame(chessBoard3, 4, 3);
-        Board chessBoard4 = new Board();
-        playGame(chessBoard4, 4, 2);
-        Board chessBoard5 = new Board();
-        playGame(chessBoard5, 3, 4);
-        Board chessBoard6 = new Board();
-        playGame(chessBoard6, 2, 4);
-        Board chessBoard7 = new Board();
-        playGame(chessBoard7, 3, 2);
-        Board chessBoard8 = new Board();
-        playGame(chessBoard8, 2, 3);
+        playGame(chessBoard, 5, 5);
     }
 
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
@@ -313,9 +299,7 @@ public class ChessGame {
                 }
             }
             System.out.println("Num Saved: " + numSaved);
-            if (optVal >= 1000 || optVal < -900) {
-                System.out.println("Num Saved Overall: " + numSavedOverall);
-            }
+            System.out.println("Num Saved Overall: " + numSavedOverall);
             //appendToFile(initI, initJ, finI, finJ);
             if (boardFreq.get(board.toString()) == null) {
                 boardFreq.put(board.toString(), 1);
