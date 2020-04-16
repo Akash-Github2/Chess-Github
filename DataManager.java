@@ -3,6 +3,7 @@ import java.io.*;
 public class DataManager {
     ArrayList<String> filenames = new ArrayList<>(); //for 0:3, 1:4, 2:5, 3:6, 4: Moves Performed
     ArrayList<Integer> fileLen = new ArrayList<>(); //doesn't include moves performed
+    ArrayList<String> fileSizes = new ArrayList<>();
     public DataManager(String folder) {
         filenames.add(folder + "moveTB-D3.txt");
         filenames.add(folder + "moveTB-D4.txt");
@@ -12,6 +13,7 @@ public class DataManager {
     }
     public void reportNumPieces() {
         fileLen.clear();
+        fileSizes.clear();
         for (int a = 0; a < filenames.size() - 1; a++) {
             try {
                 File myObj = new File(filenames.get(a));
@@ -35,6 +37,7 @@ public class DataManager {
                     }
                 }
                 fileLen.add(numLines);
+                fileSizes.add(getFileSizeKB(myObj));
                 System.out.println("--------------------------");
                 System.out.println("Depth " + (a + 3) + ":");
                 System.out.println(numPiecesFreq);
@@ -46,6 +49,13 @@ public class DataManager {
         }
         System.out.println("File Lengths:");
         System.out.println(fileLen);
+        System.out.println("File Sizes:");
+        System.out.println(fileSizes);
+        double totalFileSizes = 0;
+        for (int i = 0; i < fileSizes.size(); i++) {
+            totalFileSizes += Double.parseDouble(fileSizes.get(i).substring(0, fileSizes.get(i).length() - 3));
+        }
+        System.out.println("Total Size of Files: " + Util.rounded(totalFileSizes) + " KB");
         System.out.println("--------------------------");
     }
     public void fullClean() {
@@ -150,4 +160,7 @@ public class DataManager {
             System.out.println("FILE ERROR");
         }
     }
+    public String getFileSizeKB(File file) {
+		return Util.rounded((double) file.length() / 1024) + " KB";
+	}
 }

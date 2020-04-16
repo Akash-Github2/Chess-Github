@@ -17,7 +17,7 @@ public class ChessGame {
     private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); // 0:D3; 1:D4; 2:D5;...
     private static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
     private static ArrayList<Double[]> depthValToSkip = new ArrayList<>(); // 2,3,4,5...
-    DataManager manager = new DataManager(folder);
+    private static DataManager manager = new DataManager(folder);
     public static void main(String args[]) { // Driver
         if (!System.getProperty("os.name").equals("Mac OS X")) {
             folder = "E:/Akash/Java Projects/Chess-Github/";
@@ -32,10 +32,10 @@ public class ChessGame {
         depthValToSkip.add(depth4valToSkip);
         depthValToSkip.add(depth5valToSkip);
         depthValToSkip.add(depth6valToSkip);
-        // manager.reportNumPieces();
+        manager.reportNumPieces();
         // manager.fullClean();
-        Board chessBoard = new Board();
-        playGame(chessBoard, 6, 6);
+        // Board chessBoard = new Board();
+        // playGame(chessBoard, 6, 6);
     }
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
         System.out.print("\033[H\033[2J"); // Clear Console Command
@@ -255,7 +255,7 @@ public class ChessGame {
                 bestMoveLogList.get(maxDepth-depth-3).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
                 isAlreadyInIndivFile = false;
             }
-            if (!isAlreadyInIndivFile && ((maxDepth - depth != 3) ? true : (Util.numSpaces(board.formatBoardForFile(isComputerWhite, depth)) <= 41 && !bestMoveLogList.get(1).containsKey(board.formatBoardForFile(isComputerWhite, depth))))) {
+            if (!isAlreadyInIndivFile && ((maxDepth - depth != 3) ? true : (Util.numSpaces(board.formatBoardForFile(isComputerWhite, depth)) <= 41))) {
                 try{
                     File file = new File(fileName);
                     FileWriter writer = new FileWriter(file, true);
