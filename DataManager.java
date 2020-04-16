@@ -137,6 +137,7 @@ public class DataManager {
         System.out.println("D3 File has been cleaned of any boards with under 23 pieces.");
         reportNumPieces();
     }
+    //Only for temporary conversion (no longer needed)
     public void convert() {
         for (int a = 0; a < filenames.size() - 1; a++) {
             String fileStr = "";
