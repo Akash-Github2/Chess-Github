@@ -369,7 +369,7 @@ public class ChessGame {
         // if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 75) {
         //     depth = depth2;
         // }
-        findBestMove(board, true, 0, depth, tempMoveCounter, true, isAllowedToAccessData);
+        findBestMove(board, true, 0, depth, tempMoveCounter, player.equals("White"), isAllowedToAccessData);
         System.out.println("Num Recursions: " + recur);
         System.out.println("------------------------");
         recur = 0;
