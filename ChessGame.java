@@ -7,7 +7,9 @@ import java.io.*;
 import java.util.*;
 public class ChessGame {
     private static int recur = 0;
-    private static int numSaved = 0;
+    private static int numSavedD3 = 0;
+    private static int numSavedD4 = 0;
+    private static int numSavedD5 = 0;
     private static int numSavedOverall = 0;
     public static int moveCounter = 0;
     private static TreeMap<String, Integer> boardFreq = new TreeMap<>(); // Checks for 3 fold rule (tie)
@@ -29,10 +31,12 @@ public class ChessGame {
         depthValToSkip.add(depth4valToSkip);
         depthValToSkip.add(depth5valToSkip);
         depthValToSkip.add(depth6valToSkip);
-        // DataTester data = new DataTester(folder);
-        // data.reportNumPieces();
+        // DataManager manager = new DataManager(folder);
+        // manager.reportNumPieces();
+        // manager.cleanD3Duplicates();
+        // manager.reportNumPieces();
         Board chessBoard = new Board();
-        playGame(chessBoard, 5, 5);
+        playGame(chessBoard, 6, 6);
     }
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
         System.out.print("\033[H\033[2J"); // Clear Console Command
@@ -92,7 +96,13 @@ public class ChessGame {
     public static double findBestMove(Board board, boolean isComputerTurn, int depth, int maxDepth, int tempMoveCounter, boolean isComputerWhite, boolean isAllowedToAccessData) {
         recur++;
         if (depth > 0 && depth < maxDepth - 2 && bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) != null && moveCounter > 2 && (boardFreq.get(board.toString()) == null || boardFreq.get(board.toString()) < 2)) {
-            numSaved++;
+            if (maxDepth - depth == 3) {
+                numSavedD3++;
+            } else if (maxDepth - depth == 4) {
+                numSavedD4++;
+            } else {
+                numSavedD5++;
+            }
             numSavedOverall++;
             return bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)).val;
         }
@@ -303,7 +313,9 @@ public class ChessGame {
                     System.out.println("Size of TB D-6: " + bestMoveLogList.get(3).size());
                 }
             }
-            System.out.println("Num Saved: " + numSaved);
+            System.out.println("Num Saved D3: " + numSavedD3);
+            System.out.println("Num Saved D4: " + numSavedD4);
+            System.out.println("Num Saved D5: " + numSavedD5);
             System.out.println("Num Saved Overall: " + numSavedOverall);
             //appendToFile(initI, initJ, finI, finJ);
             if (boardFreq.get(board.toString()) == null) {
@@ -362,7 +374,9 @@ public class ChessGame {
         System.out.println("Num Recursions: " + recur);
         System.out.println("------------------------");
         recur = 0;
-        numSaved = 0;
+        numSavedD3 = 0;
+        numSavedD4 = 0;
+        numSavedD5 = 0;
     }
     public static void callAIBlack(String gamePhase, Board board, boolean isAllowedToAccessData, int blackDepth) {
         System.out.println("Black's Turn : Move #" + moveCounter + gamePhase);
@@ -375,7 +389,9 @@ public class ChessGame {
         System.out.println("Num Recursions: " + recur);
         System.out.println("------------------------");
         recur = 0;
-        numSaved = 0;
+        numSavedD3 = 0;
+        numSavedD4 = 0;
+        numSavedD5 = 0;
     }
     public static void clearMoveOutputFile() {
         try{
