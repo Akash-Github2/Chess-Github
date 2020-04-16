@@ -17,6 +17,7 @@ public class ChessGame {
     private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); // 0:D3; 1:D4; 2:D5;...
     private static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
     private static ArrayList<Double[]> depthValToSkip = new ArrayList<>(); // 2,3,4,5...
+    DataManager manager = new DataManager(folder);
     public static void main(String args[]) { // Driver
         if (!System.getProperty("os.name").equals("Mac OS X")) {
             folder = "E:/Akash/Java Projects/Chess-Github/";
@@ -31,16 +32,14 @@ public class ChessGame {
         depthValToSkip.add(depth4valToSkip);
         depthValToSkip.add(depth5valToSkip);
         depthValToSkip.add(depth6valToSkip);
-        // DataManager manager = new DataManager(folder);
         // manager.reportNumPieces();
-        // manager.cleanD3Duplicates();
-        // manager.reportNumPieces();
+        // manager.fullClean();
         Board chessBoard = new Board();
         playGame(chessBoard, 6, 6);
     }
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
         System.out.print("\033[H\033[2J"); // Clear Console Command
-        // clearMoveOutputFile();
+        // manager.clearMoveOutputFile();
         fillBestMoveLog("moveTB-D6.txt", Math.max(whiteDepth, blackDepth) == 6); // true for real deal
         fillBestMoveLog("moveTB-D5.txt", Math.max(whiteDepth, blackDepth) == 5); // true for testing depth 5 only
         fillBestMoveLog("moveTB-D4.txt", Math.max(whiteDepth, blackDepth) == 4); // true for real deal
@@ -63,10 +62,10 @@ public class ChessGame {
             }
             if (currPlayerIsWhite) {
                 // parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                callAIWhite(gamePhase, board, Math.max(whiteDepth, blackDepth) == whiteDepth, whiteDepth);
+                callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == whiteDepth, whiteDepth, "White");
             } else {
                 // parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                callAIBlack(gamePhase, board, Math.max(whiteDepth, blackDepth) == blackDepth, blackDepth);
+                callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == blackDepth, blackDepth, "Black");
             }
             if (board.isCheckMate(!currPlayerIsWhite)) {
                 System.out.println((currPlayerIsWhite) ? "White Wins!" : "Black Wins!");
@@ -193,7 +192,7 @@ public class ChessGame {
                         n-=diff;
                     }
                     if (depth == 0) {
-                        System.out.println(allPossibleMoves.get(i) + " : " + rounded(n) + "  |  " + (i+1) + "/" + allPossibleMoves.size());
+                        System.out.println(allPossibleMoves.get(i) + " : " + Util.rounded(n) + "  |  " + (i+1) + "/" + allPossibleMoves.size());
                     }
                     double numOver1 = 0;
                     boolean shouldChange = false;
@@ -256,14 +255,14 @@ public class ChessGame {
                 bestMoveLogList.get(maxDepth-depth-3).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
                 isAlreadyInIndivFile = false;
             }
-            if (!isAlreadyInIndivFile) {
+            if (!isAlreadyInIndivFile && ((maxDepth - depth != 3) ? true : (Util.numSpaces(board.formatBoardForFile(isComputerWhite, depth)) <= 41 && !bestMoveLogList.get(1).containsKey(board.formatBoardForFile(isComputerWhite, depth))))) {
                 try{
                     File file = new File(fileName);
                     FileWriter writer = new FileWriter(file, true);
                     if (file.length() != 0) {
                         writer.write("\n");
                     }
-                    writer.write(board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + rounded(optVal));
+                    writer.write(board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal));
                     writer.close();
                 }catch(Exception e) {
                     System.out.println("FILE ERROR");
@@ -292,15 +291,15 @@ public class ChessGame {
             System.out.println("--------------");
             System.out.println("Num Same Values: " + tiedOptMoves.size());
             System.out.println("Optimal Move: " + optMove);
-            System.out.println("Optimal Value: " + ((allPossibleMoves.size() == 1 || maxDepth == 0) ? "N/A" : rounded(optVal)));
+            System.out.println("Optimal Value: " + ((allPossibleMoves.size() == 1 || maxDepth == 0) ? "N/A" : Util.rounded(optVal)));
             if ((optVal >= 1000 && isComputerWhite) || (optVal < -900 && !isComputerWhite)) {
                 board.whiteAlmostWins = true;
             }
             if ((optVal >= 1000 && !isComputerWhite) || (optVal < -900 && isComputerWhite)) {
                 board.blackAlmostWins = true;
             }
-            System.out.println("White Val: " + rounded(board.getWhiteVal(moveCounter)));
-            System.out.println("Black Val: " + rounded(board.getBlackVal(moveCounter)));
+            System.out.println("White Val: " + Util.rounded(board.getWhiteVal(moveCounter)));
+            System.out.println("Black Val: " + Util.rounded(board.getBlackVal(moveCounter)));
             if (board.movesSinceNoCaptureOrPawn != 0) {
                 System.out.println("Moves Since No Capture/Pawn Mvmt: " + board.movesSinceNoCaptureOrPawn);
             }
@@ -317,7 +316,7 @@ public class ChessGame {
             System.out.println("Num Saved D4: " + numSavedD4);
             System.out.println("Num Saved D5: " + numSavedD5);
             System.out.println("Num Saved Overall: " + numSavedOverall);
-            //appendToFile(initI, initJ, finI, finJ);
+            // manager.appendToFile(initI, initJ, finI, finJ);
             if (boardFreq.get(board.toString()) == null) {
                 boardFreq.put(board.toString(), 1);
             } else {
@@ -361,12 +360,12 @@ public class ChessGame {
         } else {
             boardFreq.put(board.toString(), boardFreq.get(board.toString()) + 1);
         }
-        // appendToFile(initI, initJ, finI, finJ);
+        // manager.appendToFile(initI, initJ, finI, finJ);
     }
-    public static void callAIWhite(String gamePhase, Board board, boolean isAllowedToAccessData, int whiteDepth) {
-        System.out.println("White's Turn : Move #" + moveCounter + gamePhase);
+    public static void callAI(String gamePhase, Board board, boolean isAllowedToAccessData, int fullDepth, String player) {
+        System.out.println(player + "'s Turn : Move #" + moveCounter + gamePhase);
         int tempMoveCounter = moveCounter;
-        int depth = whiteDepth;
+        int depth = fullDepth;
         // if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 75) {
         //     depth = depth2;
         // }
@@ -377,44 +376,6 @@ public class ChessGame {
         numSavedD3 = 0;
         numSavedD4 = 0;
         numSavedD5 = 0;
-    }
-    public static void callAIBlack(String gamePhase, Board board, boolean isAllowedToAccessData, int blackDepth) {
-        System.out.println("Black's Turn : Move #" + moveCounter + gamePhase);
-        int tempMoveCounter = moveCounter;
-        int depth = blackDepth;
-        // if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 75) {
-        //     depth = depth2;
-        // }
-        findBestMove(board, true, 0, depth, tempMoveCounter, false, isAllowedToAccessData);
-        System.out.println("Num Recursions: " + recur);
-        System.out.println("------------------------");
-        recur = 0;
-        numSavedD3 = 0;
-        numSavedD4 = 0;
-        numSavedD5 = 0;
-    }
-    public static void clearMoveOutputFile() {
-        try{
-            File file = new File(folder + "MovesPerformed.txt");
-            FileWriter writer = new FileWriter(file);
-            writer.write("");
-            writer.close();
-        }catch(Exception e) {
-            System.out.println("FILE ERROR");
-        }
-    }
-    public static void appendToFile(int initI, int initJ, int finI, int finJ) {
-        try{
-            File file = new File(folder + "MovesPerformed.txt");
-            FileWriter writer = new FileWriter(file, true);
-            if (file.length() != 0) {
-                writer.write("\n");
-            }
-            writer.write("chessBoard.makeMoveOverall(" + initI + ", " + initJ + ", " + finI + ", " + finJ + ", false);");
-            writer.close();
-        }catch(Exception e) {
-            System.out.println("FILE ERROR");
-        }
     }
     public static void fillBestMoveLog(String filename, boolean checkToAdd) {
         TreeMap<String, MoveVal> bestMoveLogIndiv = new TreeMap<>();
@@ -437,8 +398,5 @@ public class ChessGame {
         } catch (FileNotFoundException e) { 
             System.out.println("File Error");
         }
-    }
-    public static double rounded(double num) {
-        return Math.round(num*1000)/1000.0;
     }
 }
