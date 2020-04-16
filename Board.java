@@ -523,9 +523,18 @@ public class Board {
     }
     public String formatBoardForFile(boolean isComputerWhite, int depth) {
         String retStr = "";
+        int count = 0;
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
-                retStr += ((board[i][j] != null) ? board[i][j] : " ");
+                if ((board[i][j] != null)) {
+                    if (count != 0) {
+                        retStr += count;
+                        count = 0;
+                    }
+                    retStr += board[i][j];
+                } else {
+                    count++;
+                }
             }
         }
         boolean isWhite = isComputerWhite;

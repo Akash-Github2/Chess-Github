@@ -32,10 +32,11 @@ public class ChessGame {
         depthValToSkip.add(depth4valToSkip);
         depthValToSkip.add(depth5valToSkip);
         depthValToSkip.add(depth6valToSkip);
-        manager.reportNumPieces();
+        // manager.reportNumPieces();
+        // manager.convert();
         // manager.fullClean();
-        // Board chessBoard = new Board();
-        // playGame(chessBoard, 6, 6);
+        Board chessBoard = new Board();
+        playGame(chessBoard, 6, 6);
     }
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
         System.out.print("\033[H\033[2J"); // Clear Console Command

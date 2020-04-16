@@ -137,6 +137,55 @@ public class DataManager {
         System.out.println("D3 File has been cleaned of any boards with under 23 pieces.");
         reportNumPieces();
     }
+    public void convert() {
+        for (int a = 0; a < filenames.size() - 1; a++) {
+            String fileStr = "";
+            try {
+                File file = new File(filenames.get(a));
+                Scanner reader = new Scanner(file);
+                int count = 0;
+                while (reader.hasNextLine()) {
+                    if (count % 2000 == 0) {
+                        System.out.println(a + ": " + count);
+                    }
+                    count++;
+                    String line = reader.nextLine();
+                    String boardStr = line.split(":")[0];
+                    String endOfStr = line.split(":")[1];
+                    String newStr = "";
+                    for (int i = 0; i < boardStr.length(); i++) {
+                        if (!boardStr.substring(i,i+1).equals(" ")) {
+                            newStr += boardStr.substring(i,i+1);
+                        } else {
+                            int numSpacesInRow = 0;
+                            for (int j = i; j < boardStr.length(); j++) {
+                                if (boardStr.substring(j,j+1).equals(" ")) {
+                                    numSpacesInRow++;
+                                } else {
+                                    i = j - 1;
+                                    break;
+                                }
+                            }
+                            newStr += Integer.toString(numSpacesInRow);
+                        }
+                    }
+                    newStr += ":" + endOfStr;
+                    if (fileStr.length() != 0) {
+                        fileStr += "\n";
+                    }
+                    fileStr += newStr;
+                }
+                FileWriter writer = new FileWriter(file);
+                writer.write(fileStr);
+                writer.close();
+                reader.close();
+            } catch (Exception e) { 
+                System.out.println("File Error");
+            }
+        }
+        System.out.println("All Files has been converted");
+        reportNumPieces();
+    }
     public void clearMoveOutputFile() {
         try{
             File file = new File(filenames.get(4));
