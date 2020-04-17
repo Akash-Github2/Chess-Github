@@ -1,15 +1,18 @@
 public class MoveVal {
-    public String move = "";
-    public double val = 0;
+    private String move = "";
+    private double val = 0;
     public MoveVal (String optMove, double optVal) {
         move = optMove;
         val = optVal;
     }
     //1,3->1,4 1.2
     public String toString() {
-        return move + " " + rounded(val);
+        return move + " " + Util.rounded(val);
     }
-    public static double rounded(double num) {
-        return Math.round(num*1000)/1000.0;
+    public String getMove() {
+        return move;
+    }
+    public double getVal() {
+        return val;
     }
 }

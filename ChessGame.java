@@ -1,4 +1,3 @@
-
 /**
  * @author Akash Pulinthanathu
  * Chess Game with Advanced AI
@@ -11,7 +10,7 @@ public class ChessGame {
     private static int numSavedD4 = 0;
     private static int numSavedD5 = 0;
     private static int numSavedOverall = 0;
-    public static int moveCounter = 0;
+    private static int moveCounter = 0;
     private static TreeMap<String, Integer> boardFreq = new TreeMap<>(); // Checks for 3 fold rule (tie)
     private static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); // Overall
     private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); // 0:D3; 1:D4; 2:D5;...
@@ -33,7 +32,6 @@ public class ChessGame {
         depthValToSkip.add(depth5valToSkip);
         depthValToSkip.add(depth6valToSkip);
         // manager.reportNumPieces();
-        // manager.convert();
         // manager.fullClean();
         Board chessBoard = new Board();
         playGame(chessBoard, 6, 6);
@@ -104,7 +102,7 @@ public class ChessGame {
                 numSavedD5++;
             }
             numSavedOverall++;
-            return bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)).val;
+            return bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)).getVal();
         }
         boolean isWhite = true;
         if ((isComputerTurn && !isComputerWhite) || (!isComputerTurn && isComputerWhite)) {
@@ -177,7 +175,7 @@ public class ChessGame {
                         if (!isComputerTurn) {
                             shouldReturn = diff - num > optVal;
                         }
-                        if (shouldReturn && tempMoveCounter < 60 && !board.whiteAlmostWins && !board.blackAlmostWins) {
+                        if (shouldReturn && tempMoveCounter < 60 && !board.isAlmostCheckmate) {
                             //reset it
                             board.fullyResetMove(initI, initJ, finI, finJ, !isWhite, didPawnPromo, origPiece);
                             if (boardFreq.get(triedBoard) == 1) {
@@ -230,8 +228,8 @@ public class ChessGame {
         }
         boolean isAlreadyFound = false;
         if (depth == 0 && bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null && (boardFreq.get(board.toString()) == null || boardFreq.get(board.toString()) < 2) && isAllowedToAccessData) {
-            optMove = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).move;
-            optVal = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).val;
+            optMove = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).getMove();
+            optVal = bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)).getVal();
             isAlreadyFound = true;
         }
         if (maxDepth == 0) { //returns a random move for max depth = 0
@@ -293,11 +291,10 @@ public class ChessGame {
             System.out.println("Num Same Values: " + tiedOptMoves.size());
             System.out.println("Optimal Move: " + optMove);
             System.out.println("Optimal Value: " + ((allPossibleMoves.size() == 1 || maxDepth == 0) ? "N/A" : Util.rounded(optVal)));
-            if ((optVal >= 1000 && isComputerWhite) || (optVal < -900 && !isComputerWhite)) {
-                board.whiteAlmostWins = true;
-            }
-            if ((optVal >= 1000 && !isComputerWhite) || (optVal < -900 && isComputerWhite)) {
-                board.blackAlmostWins = true;
+            if (allPossibleMoves.size() != 1 && (optVal >= 1000 || optVal < -900)) {
+                board.isAlmostCheckmate = true;
+            } else {
+                board.isAlmostCheckmate = false;
             }
             System.out.println("White Val: " + Util.rounded(board.getWhiteVal(moveCounter)));
             System.out.println("Black Val: " + Util.rounded(board.getBlackVal(moveCounter)));

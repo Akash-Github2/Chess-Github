@@ -1,9 +1,9 @@
 import java.util.*;
 import java.io.*;
 public class DataManager {
-    ArrayList<String> filenames = new ArrayList<>(); //for 0:3, 1:4, 2:5, 3:6, 4: Moves Performed
-    ArrayList<Integer> fileLen = new ArrayList<>(); //doesn't include moves performed
-    ArrayList<String> fileSizes = new ArrayList<>();
+    private ArrayList<String> filenames = new ArrayList<>(); //for 0:3, 1:4, 2:5, 3:6, 4: Moves Performed
+    private ArrayList<Integer> fileLen = new ArrayList<>(); //doesn't include moves performed
+    private ArrayList<String> fileSizes = new ArrayList<>();
     public DataManager(String folder) {
         filenames.add(folder + "moveTB-D3.txt");
         filenames.add(folder + "moveTB-D4.txt");

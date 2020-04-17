@@ -9,8 +9,7 @@ public class Board {
     public boolean bRookLHasMoved = false;
     public boolean wRookRHasMoved = false;
     public boolean bRookRHasMoved = false;
-    public boolean whiteAlmostWins = false; //black is guarenteed to get checkmate in a couple moves
-    public boolean blackAlmostWins = false; //white is guarenteed to get checkmate in a couple moves
+    public boolean isAlmostCheckmate = false;
     public int movesSinceNoCaptureOrPawn = 0;
     public Board() {
         board = initializeBoard(board);
