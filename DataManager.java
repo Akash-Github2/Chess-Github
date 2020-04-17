@@ -4,6 +4,7 @@ public class DataManager {
     private ArrayList<String> filenames = new ArrayList<>(); //for 0:3, 1:4, 2:5, 3:6, 4: Moves Performed
     private ArrayList<Integer> fileLen = new ArrayList<>(); //doesn't include moves performed
     private ArrayList<String> fileSizes = new ArrayList<>();
+    private Util util = new Util();
     public DataManager(String folder) {
         filenames.add(folder + "moveTB-D3.txt");
         filenames.add(folder + "moveTB-D4.txt");
@@ -24,12 +25,7 @@ public class DataManager {
                     numLines++;
                     String line = reader.nextLine();
                     String boardStr = line.split(":")[0];
-                    int count = 0;
-                    for (int i = 0; i < boardStr.length() - 1; i++) {
-                        if (!boardStr.substring(i, i+1).equals(" ")) {
-                            count++;
-                        }
-                    }
+                    int count = util.numPieces(boardStr);
                     if (numPiecesFreq.get(count) == null) {
                         numPiecesFreq.put(count, 1);
                     } else {
@@ -55,12 +51,12 @@ public class DataManager {
         for (int i = 0; i < fileSizes.size(); i++) {
             totalFileSizes += Double.parseDouble(fileSizes.get(i).substring(0, fileSizes.get(i).length() - 3));
         }
-        System.out.println("Total Size of Files: " + Util.rounded(totalFileSizes) + " KB");
+        System.out.println("Total Size of Files: " + util.rounded(totalFileSizes) + " KB");
         System.out.println("--------------------------");
     }
     public void fullClean() {
         cleanD3Duplicates();
-        cleanD3RemoveBelow23();
+        cleanD3RemoveBelow24();
         reportNumPieces();
     }
     public void cleanD3Duplicates() { // will remove all duplicates in D3 that are in D4 already
@@ -83,7 +79,7 @@ public class DataManager {
             Scanner reader = new Scanner(file);
             int count = 0;
             while (reader.hasNextLine()) {
-                if (count % 1000 == 0) {
+                if (count % 2000 == 0) {
                     System.out.println(count);
                 }
                 count++;
@@ -107,7 +103,7 @@ public class DataManager {
         System.out.println("D3 File has been cleaned of any duplicates.");
         reportNumPieces();
     }
-    public void cleanD3RemoveBelow23() { //will remove anything with under 23 pieces because it will likely never happen
+    public void cleanD3RemoveBelow24() { //will remove anything with under 24 pieces because it will likely never happen
         String d3Str = "";
         try { //Go through D3 file
             File file = new File(filenames.get(0));
@@ -120,7 +116,7 @@ public class DataManager {
                 count++;
                 String line = reader.nextLine();
                 String boardStr = line.split(":")[0];
-                if (Util.numSpaces(boardStr) <= 41) {
+                if (util.numPieces(boardStr) >= 24) {
                     if (d3Str.length() != 0) {
                         d3Str += "\n";
                     }
@@ -134,57 +130,7 @@ public class DataManager {
         } catch (Exception e) { 
             System.out.println("File Error");
         }
-        System.out.println("D3 File has been cleaned of any boards with under 23 pieces.");
-        reportNumPieces();
-    }
-    //Only for temporary conversion (no longer needed)
-    public void convert() {
-        for (int a = 0; a < filenames.size() - 1; a++) {
-            String fileStr = "";
-            try {
-                File file = new File(filenames.get(a));
-                Scanner reader = new Scanner(file);
-                int count = 0;
-                while (reader.hasNextLine()) {
-                    if (count % 2000 == 0) {
-                        System.out.println(a + ": " + count);
-                    }
-                    count++;
-                    String line = reader.nextLine();
-                    String boardStr = line.split(":")[0];
-                    String endOfStr = line.split(":")[1];
-                    String newStr = "";
-                    for (int i = 0; i < boardStr.length(); i++) {
-                        if (!boardStr.substring(i,i+1).equals(" ")) {
-                            newStr += boardStr.substring(i,i+1);
-                        } else {
-                            int numSpacesInRow = 0;
-                            for (int j = i; j < boardStr.length(); j++) {
-                                if (boardStr.substring(j,j+1).equals(" ")) {
-                                    numSpacesInRow++;
-                                } else {
-                                    i = j - 1;
-                                    break;
-                                }
-                            }
-                            newStr += Integer.toString(numSpacesInRow);
-                        }
-                    }
-                    newStr += ":" + endOfStr;
-                    if (fileStr.length() != 0) {
-                        fileStr += "\n";
-                    }
-                    fileStr += newStr;
-                }
-                FileWriter writer = new FileWriter(file);
-                writer.write(fileStr);
-                writer.close();
-                reader.close();
-            } catch (Exception e) { 
-                System.out.println("File Error");
-            }
-        }
-        System.out.println("All Files has been converted");
+        System.out.println("D3 File has been cleaned of any boards with under 24 pieces.");
         reportNumPieces();
     }
     public void clearMoveOutputFile() {
@@ -211,6 +157,6 @@ public class DataManager {
         }
     }
     public String getFileSizeKB(File file) {
-		return Util.rounded((double) file.length() / 1024) + " KB";
+		return util.rounded((double) file.length() / 1024) + " KB";
 	}
 }
