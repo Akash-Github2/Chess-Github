@@ -331,14 +331,14 @@ public abstract class ChessPiece {
                 }
             }
         }
-        if (board.canCastleKingSide(isWhite())) {
-            Integer[] temp = {((isWhite()) ? 7 : 0),6};
-            possibleMoves.add(temp);
-        }
-        if (board.canCastleQueenSide(isWhite())) {
-            Integer[] temp = {((isWhite()) ? 7 : 0),2};
-            possibleMoves.add(temp);
-        }
+        // if (board.canCastleKingSide(isWhite())) {
+        //     Integer[] temp = {((isWhite()) ? 7 : 0),6};
+        //     possibleMoves.add(temp);
+        // }
+        // if (board.canCastleQueenSide(isWhite())) {
+        //     Integer[] temp = {((isWhite()) ? 7 : 0),2};
+        //     possibleMoves.add(temp);
+        // }
         return possibleMoves;
     }
     public boolean isMovePossible(int locI, int locJ, int newI, int newJ, ChessPiece[][] board, ArrayList<ChessPiece> whitePieces, ArrayList<ChessPiece> blackPieces) {

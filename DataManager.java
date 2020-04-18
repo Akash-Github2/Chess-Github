@@ -54,20 +54,21 @@ public class DataManager {
         System.out.println("Total Size of Files: " + Util.rounded(totalFileSizes) + " KB");
         System.out.println("--------------------------");
     }
-    public void fullClean() {
+    public void fullClean(int num) {
         cleanD3Duplicates();
-        cleanD3RemoveBelow24();
+        cleanD3RemoveBelowNum(num);
         reportNumPieces();
     }
     public void cleanD3Duplicates() { // will remove all duplicates in D3 that are in D4 already
-        ArrayList<String> uniqueMoves = new ArrayList<>(); //For D3 and D4
+        TreeMap<String, String> uniqueBoardsAndMoves = new TreeMap<>(); //For D3 and D4
         try { //Go through D4 file
             File myObj = new File(filenames.get(1));
             Scanner reader = new Scanner(myObj);
             while (reader.hasNextLine()) {
                 String line = reader.nextLine();
                 String boardStr = line.split(":")[0];
-                uniqueMoves.add(boardStr);
+                String endStr = line.split(":")[1];
+                uniqueBoardsAndMoves.put(boardStr, endStr);
             }
             reader.close();
         } catch (Exception e) { 
@@ -85,8 +86,9 @@ public class DataManager {
                 count++;
                 String line = reader.nextLine();
                 String boardStr = line.split(":")[0];
-                if (!uniqueMoves.contains(boardStr)) {
-                    uniqueMoves.add(boardStr);
+                String endStr = line.split(":")[1];
+                if (uniqueBoardsAndMoves.get(boardStr) == null) {
+                    uniqueBoardsAndMoves.put(boardStr, endStr);
                     if (d3Str.length() != 0) {
                         d3Str += "\n";
                     }
@@ -103,7 +105,7 @@ public class DataManager {
         System.out.println("D3 File has been cleaned of any duplicates.");
         reportNumPieces();
     }
-    public void cleanD3RemoveBelow24() { //will remove anything with under 24 pieces because it will likely never happen
+    public void cleanD3RemoveBelowNum(int num) { //will remove anything with under a certain number of pieces because it will likely never happen
         String d3Str = "";
         try { //Go through D3 file
             File file = new File(filenames.get(0));
@@ -116,7 +118,7 @@ public class DataManager {
                 count++;
                 String line = reader.nextLine();
                 String boardStr = line.split(":")[0];
-                if (Util.numPieces(boardStr) >= 24) {
+                if (Util.numPieces(boardStr) >= num) {
                     if (d3Str.length() != 0) {
                         d3Str += "\n";
                     }
@@ -130,7 +132,7 @@ public class DataManager {
         } catch (Exception e) { 
             System.out.println("File Error");
         }
-        System.out.println("D3 File has been cleaned of any boards with under 24 pieces.");
+        System.out.println("D3 File has been cleaned of any boards with under " + num + " pieces.");
         reportNumPieces();
     }
     public void clearMoveOutputFile() {

@@ -17,6 +17,8 @@ public class ChessGame {
     private static String folder = (System.getProperty("os.name").equals("Mac OS X")) ? "/Users/akash/software/Akash/Java Projects/Chess-Github/" : "E:/Akash/Java Projects/Chess-Github/";
     private static ArrayList<Double[]> depthValToSkip = new ArrayList<>(); // 2,3,4,5...
     private static DataManager manager = new DataManager(folder);
+    private static int minPiecesRequired = 25;
+    private static String d3StrToAdd = "";
     public static void main(String args[]) { // Driver
         Double[] depth2valToSkip = { 2.0, 2.2, 2.4, 2.7, 3.0, 3.4, 4.0, 4.5 };
         Double[] depth3valToSkip = { 2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 5.5 };
@@ -29,15 +31,15 @@ public class ChessGame {
         depthValToSkip.add(depth5valToSkip);
         depthValToSkip.add(depth6valToSkip);
         // manager.reportNumPieces();
-        // manager.cleanD3Duplicates();
+        // manager.fullClean(minPiecesRequired);
         Board chessBoard = new Board();
-        playGame(chessBoard, 6, 6);
+        playGame(chessBoard, 4, 4);
     }
 
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
         System.out.print("\033[H\033[2J"); // Clear Console Command
-        // manager.clearMoveOutputFile();
-        fillBestMoveLog("moveTB-D6.txt", Math.max(whiteDepth, blackDepth) == 6); // true for real deal
+        manager.clearMoveOutputFile();
+        fillBestMoveLog("moveTB-D6.txt", true/*Math.max(whiteDepth, blackDepth) == 6*/); // true for real deal
         fillBestMoveLog("moveTB-D5.txt", Math.max(whiteDepth, blackDepth) == 5); // true for testing depth 5 only
         fillBestMoveLog("moveTB-D4.txt", Math.max(whiteDepth, blackDepth) == 4); // true for real deal
         fillBestMoveLog("moveTB-D3.txt", Math.max(whiteDepth, blackDepth) == 3); // true for testing depth 3 only
@@ -62,9 +64,8 @@ public class ChessGame {
                 // gamePhase, board, currPlayerIsWhite, br);
                 callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == whiteDepth, whiteDepth, "White");
             } else {
-                // parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter +
-                // gamePhase, board, currPlayerIsWhite, br);
-                callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == blackDepth, blackDepth, "Black");
+                 parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
+                //callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == blackDepth, blackDepth, "Black");
             }
             if (board.isCheckMate(!currPlayerIsWhite)) {
                 System.out.println((currPlayerIsWhite) ? "White Wins!" : "Black Wins!");
@@ -259,27 +260,43 @@ public class ChessGame {
                 }
             }
         }
-        if (depth >= 0 && depth < maxDepth - 2 && (depth == 0 || moveCounter > 2)) {
-            String fileName = folder + "moveTB-D" + (maxDepth - depth) + ".txt";
-            boolean isAlreadyInIndivFile = true;
-            if (bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
-                bestMoveLogList.get(maxDepth-depth-3).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
-                isAlreadyInIndivFile = false;
-            }
-            if (!isAlreadyInIndivFile && ((maxDepth - depth != 3) ? true : (Util.numPieces(board.formatBoardForFile(isComputerWhite, depth)) >= 24))) {
-                try{
-                    File file = new File(fileName);
-                    FileWriter writer = new FileWriter(file, true);
-                    if (file.length() != 0) {
-                        writer.write("\n");
-                    }
-                    writer.write(board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal));
-                    writer.close();
-                }catch(Exception e) {
-                    System.out.println("FILE ERROR");
-                }
-            }
-        }
+        // if (depth >= 0 && depth < maxDepth - 2 && (depth == 0 || moveCounter > 2)) {
+        //     String fileName = folder + "moveTB-D" + (maxDepth - depth) + ".txt";
+        //     boolean isAlreadyInIndivFile = true;
+        //     if (bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
+        //         bestMoveLogList.get(maxDepth-depth-3).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
+        //         isAlreadyInIndivFile = false;
+        //     }
+        //     if (!isAlreadyInIndivFile && !isAlreadyFound && ((maxDepth - depth != 3) ? true : (Util.numPieces(board.formatBoardForFile(isComputerWhite, depth)) >= minPiecesRequired))) {
+        //         if (maxDepth - depth == 3) {
+        //             d3StrToAdd += "\n" + board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal);
+        //         } else {
+        //             try{
+        //                 File file = new File(fileName);
+        //                 FileWriter writer = new FileWriter(file, true);
+        //                 if (file.length() != 0) {
+        //                     writer.write("\n");
+        //                 }
+        //                 writer.write(board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal));
+        //                 writer.close();
+        //             }catch(Exception e) {
+        //                 System.out.println("FILE ERROR");
+        //             }
+        //         }
+        //     }
+        // }
+        // if (maxDepth - depth == 4 || depth == 0) { //Adds to D3 file in bulk
+        //     String fileName = folder + "moveTB-D3.txt";
+        //     try{
+        //         File file = new File(fileName);
+        //         FileWriter writer = new FileWriter(file, true);
+        //         writer.write(d3StrToAdd);
+        //         writer.close();
+        //         d3StrToAdd = "";
+        //     }catch(Exception e) {
+        //         System.out.println("FILE ERROR");
+        //     }
+        // }
         if (depth == 0) {
             if (!isAlreadyFound && maxDepth != 0) {
                 bestMoveLog.put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
@@ -326,7 +343,7 @@ public class ChessGame {
             System.out.println("Num Saved D4: " + numSavedD4);
             System.out.println("Num Saved D5: " + numSavedD5);
             System.out.println("Num Saved Overall: " + numSavedOverall);
-            // manager.appendToFile(initI, initJ, finI, finJ);
+            manager.appendToFile(initI, initJ, finI, finJ);
             if (boardFreq.get(board.toString()) == null) {
                 boardFreq.put(board.toString(), 1);
             } else {
@@ -370,7 +387,7 @@ public class ChessGame {
         } else {
             boardFreq.put(board.toString(), boardFreq.get(board.toString()) + 1);
         }
-        // manager.appendToFile(initI, initJ, finI, finJ);
+        manager.appendToFile(initI, initJ, finI, finJ);
     }
     public static void callAI(String gamePhase, Board board, boolean isAllowedToAccessData, int fullDepth, String player) {
         System.out.println(player + "'s Turn : Move #" + moveCounter + gamePhase);
