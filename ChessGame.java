@@ -14,14 +14,10 @@ public class ChessGame {
     private static TreeMap<String, Integer> boardFreq = new TreeMap<>(); // Checks for 3 fold rule (tie)
     private static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); // Overall
     private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); // 0:D3; 1:D4; 2:D5;...
-    private static String folder = "/Users/akash/software/Akash/Java Projects/Chess-Github/";
+    private static String folder = (System.getProperty("os.name").equals("Mac OS X")) ? "/Users/akash/software/Akash/Java Projects/Chess-Github/" : "E:/Akash/Java Projects/Chess-Github/";
     private static ArrayList<Double[]> depthValToSkip = new ArrayList<>(); // 2,3,4,5...
     private static DataManager manager = new DataManager(folder);
-    private static Util util = new Util();
     public static void main(String args[]) { // Driver
-        if (!System.getProperty("os.name").equals("Mac OS X")) {
-            folder = "E:/Akash/Java Projects/Chess-Github/";
-        }
         Double[] depth2valToSkip = { 2.0, 2.2, 2.4, 2.7, 3.0, 3.4, 4.0, 4.5 };
         Double[] depth3valToSkip = { 2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 5.5 };
         Double[] depth4valToSkip = { 2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 6.0 };
@@ -34,8 +30,8 @@ public class ChessGame {
         depthValToSkip.add(depth6valToSkip);
         manager.reportNumPieces();
         // manager.cleanD3Duplicates();
-        Board chessBoard = new Board();
-        playGame(chessBoard, 6, 6);
+        // Board chessBoard = new Board();
+        // playGame(chessBoard, 6, 6);
     }
 
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
@@ -206,7 +202,7 @@ public class ChessGame {
                         n -= diff;
                     }
                     if (depth == 0) {
-                        System.out.println(allPossibleMoves.get(i) + " : " + util.rounded(n) + "  |  " + (i + 1) + "/"
+                        System.out.println(allPossibleMoves.get(i) + " : " + Util.rounded(n) + "  |  " + (i + 1) + "/"
                                 + allPossibleMoves.size());
                     }
                     double numOver1 = 0;
@@ -270,14 +266,14 @@ public class ChessGame {
                 bestMoveLogList.get(maxDepth-depth-3).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
                 isAlreadyInIndivFile = false;
             }
-            if (!isAlreadyInIndivFile && ((maxDepth - depth != 3) ? true : (util.numPieces(board.formatBoardForFile(isComputerWhite, depth)) >= 24))) {
+            if (!isAlreadyInIndivFile && ((maxDepth - depth != 3) ? true : (Util.numPieces(board.formatBoardForFile(isComputerWhite, depth)) >= 24))) {
                 try{
                     File file = new File(fileName);
                     FileWriter writer = new FileWriter(file, true);
                     if (file.length() != 0) {
                         writer.write("\n");
                     }
-                    writer.write(board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + util.rounded(optVal));
+                    writer.write(board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal));
                     writer.close();
                 }catch(Exception e) {
                     System.out.println("FILE ERROR");
@@ -306,14 +302,14 @@ public class ChessGame {
             System.out.println("--------------");
             System.out.println("Num Same Values: " + tiedOptMoves.size());
             System.out.println("Optimal Move: " + optMove);
-            System.out.println("Optimal Value: " + ((allPossibleMoves.size() == 1 || maxDepth == 0) ? "N/A" : util.rounded(optVal)));
+            System.out.println("Optimal Value: " + ((allPossibleMoves.size() == 1 || maxDepth == 0) ? "N/A" : Util.rounded(optVal)));
             if (allPossibleMoves.size() != 1 && (optVal >= 1000 || optVal < -900)) {
                 board.isAlmostCheckmate = true;
             } else {
                 board.isAlmostCheckmate = false;
             }
-            System.out.println("White Val: " + util.rounded(board.getWhiteVal(moveCounter)));
-            System.out.println("Black Val: " + util.rounded(board.getBlackVal(moveCounter)));
+            System.out.println("White Val: " + Util.rounded(board.getWhiteVal(moveCounter)));
+            System.out.println("Black Val: " + Util.rounded(board.getBlackVal(moveCounter)));
             if (board.movesSinceNoCaptureOrPawn != 0) {
                 System.out.println("Moves Since No Capture/Pawn Mvmt: " + board.movesSinceNoCaptureOrPawn);
             }

@@ -4,7 +4,6 @@ public class DataManager {
     private ArrayList<String> filenames = new ArrayList<>(); //for 0:3, 1:4, 2:5, 3:6, 4: Moves Performed
     private ArrayList<Integer> fileLen = new ArrayList<>(); //doesn't include moves performed
     private ArrayList<String> fileSizes = new ArrayList<>(); //doesn't include moves performed
-    private Util util = new Util();
     public DataManager(String folder) {
         filenames.add(folder + "moveTB-D3.txt");
         filenames.add(folder + "moveTB-D4.txt");
@@ -25,7 +24,7 @@ public class DataManager {
                     numLines++;
                     String line = reader.nextLine();
                     String boardStr = line.split(":")[0];
-                    int count = util.numPieces(boardStr);
+                    int count = Util.numPieces(boardStr);
                     if (numPiecesFreq.get(count) == null) {
                         numPiecesFreq.put(count, 1);
                     } else {
@@ -39,8 +38,9 @@ public class DataManager {
                 System.out.println(numPiecesFreq);
                 System.out.println("--------------------------");
                 reader.close();
-            } catch (FileNotFoundException e) { 
-                System.out.println("File Error");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace(); 
+                System.out.println("File Err");
             }
         }
         System.out.println("File Lengths:");
@@ -51,7 +51,7 @@ public class DataManager {
         for (int i = 0; i < fileSizes.size(); i++) {
             totalFileSizes += Double.parseDouble(fileSizes.get(i).substring(0, fileSizes.get(i).length() - 3));
         }
-        System.out.println("Total Size of Files: " + util.rounded(totalFileSizes) + " KB");
+        System.out.println("Total Size of Files: " + Util.rounded(totalFileSizes) + " KB");
         System.out.println("--------------------------");
     }
     public void fullClean() {
@@ -116,7 +116,7 @@ public class DataManager {
                 count++;
                 String line = reader.nextLine();
                 String boardStr = line.split(":")[0];
-                if (util.numPieces(boardStr) >= 24) {
+                if (Util.numPieces(boardStr) >= 24) {
                     if (d3Str.length() != 0) {
                         d3Str += "\n";
                     }
@@ -157,6 +157,6 @@ public class DataManager {
         }
     }
     public String getFileSizeKB(File file) {
-		return util.rounded((double) file.length() / 1024) + " KB";
+		return Util.rounded((double) file.length() / 1024) + " KB";
 	}
 }
