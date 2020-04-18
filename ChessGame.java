@@ -33,9 +33,9 @@ public class ChessGame {
         depthValToSkip.add(depth5valToSkip);
         depthValToSkip.add(depth6valToSkip);
         manager.reportNumPieces();
-        manager.fullClean();
-        // Board chessBoard = new Board();
-        // playGame(chessBoard, 6, 6);
+        // manager.cleanD3Duplicates();
+        Board chessBoard = new Board();
+        playGame(chessBoard, 6, 6);
     }
 
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
