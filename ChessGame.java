@@ -28,10 +28,10 @@ public class ChessGame {
         depthValToSkip.add(depth4valToSkip);
         depthValToSkip.add(depth5valToSkip);
         depthValToSkip.add(depth6valToSkip);
-        manager.reportNumPieces();
+        // manager.reportNumPieces();
         // manager.cleanD3Duplicates();
-        // Board chessBoard = new Board();
-        // playGame(chessBoard, 6, 6);
+        Board chessBoard = new Board();
+        playGame(chessBoard, 6, 6);
     }
 
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
