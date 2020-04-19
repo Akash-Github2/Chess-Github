@@ -64,8 +64,8 @@ public class ChessGame {
                 // gamePhase, board, currPlayerIsWhite, br);
                 callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == whiteDepth, whiteDepth, "White");
             } else {
-                 parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                //callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == blackDepth, blackDepth, "Black");
+                 //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
+                callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == blackDepth, blackDepth, "Black");
             }
             if (board.isCheckMate(!currPlayerIsWhite)) {
                 System.out.println((currPlayerIsWhite) ? "White Wins!" : "Black Wins!");
@@ -260,43 +260,43 @@ public class ChessGame {
                 }
             }
         }
-        // if (depth >= 0 && depth < maxDepth - 2 && (depth == 0 || moveCounter > 2)) {
-        //     String fileName = folder + "moveTB-D" + (maxDepth - depth) + ".txt";
-        //     boolean isAlreadyInIndivFile = true;
-        //     if (bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
-        //         bestMoveLogList.get(maxDepth-depth-3).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
-        //         isAlreadyInIndivFile = false;
-        //     }
-        //     if (!isAlreadyInIndivFile && !isAlreadyFound && ((maxDepth - depth != 3) ? true : (Util.numPieces(board.formatBoardForFile(isComputerWhite, depth)) >= minPiecesRequired))) {
-        //         if (maxDepth - depth == 3) {
-        //             d3StrToAdd += "\n" + board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal);
-        //         } else {
-        //             try{
-        //                 File file = new File(fileName);
-        //                 FileWriter writer = new FileWriter(file, true);
-        //                 if (file.length() != 0) {
-        //                     writer.write("\n");
-        //                 }
-        //                 writer.write(board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal));
-        //                 writer.close();
-        //             }catch(Exception e) {
-        //                 System.out.println("FILE ERROR");
-        //             }
-        //         }
-        //     }
-        // }
-        // if (maxDepth - depth == 4 || depth == 0) { //Adds to D3 file in bulk
-        //     String fileName = folder + "moveTB-D3.txt";
-        //     try{
-        //         File file = new File(fileName);
-        //         FileWriter writer = new FileWriter(file, true);
-        //         writer.write(d3StrToAdd);
-        //         writer.close();
-        //         d3StrToAdd = "";
-        //     }catch(Exception e) {
-        //         System.out.println("FILE ERROR");
-        //     }
-        // }
+        if (depth >= 0 && depth < maxDepth - 2 && (depth == 0 || moveCounter > 2)) {
+            String fileName = folder + "moveTB-D" + (maxDepth - depth) + ".txt";
+            boolean isAlreadyInIndivFile = true;
+            if (bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
+                bestMoveLogList.get(maxDepth-depth-3).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
+                isAlreadyInIndivFile = false;
+            }
+            if (!isAlreadyInIndivFile && !isAlreadyFound && ((maxDepth - depth != 3) ? true : (Util.numPieces(board.formatBoardForFile(isComputerWhite, depth)) >= minPiecesRequired))) {
+                if (maxDepth - depth == 3) {
+                    d3StrToAdd += "\n" + board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal);
+                } else {
+                    try{
+                        File file = new File(fileName);
+                        FileWriter writer = new FileWriter(file, true);
+                        if (file.length() != 0) {
+                            writer.write("\n");
+                        }
+                        writer.write(board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal));
+                        writer.close();
+                    }catch(Exception e) {
+                        System.out.println("FILE ERROR");
+                    }
+                }
+            }
+        }
+        if (maxDepth - depth == 4 || depth == 0) { //Adds to D3 file in bulk
+            String fileName = folder + "moveTB-D3.txt";
+            try{
+                File file = new File(fileName);
+                FileWriter writer = new FileWriter(file, true);
+                writer.write(d3StrToAdd);
+                writer.close();
+                d3StrToAdd = "";
+            }catch(Exception e) {
+                System.out.println("FILE ERROR");
+            }
+        }
         if (depth == 0) {
             if (!isAlreadyFound && maxDepth != 0) {
                 bestMoveLog.put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
