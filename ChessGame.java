@@ -416,8 +416,11 @@ public class ChessGame {
         System.out.println(player + "'s Turn : Move #" + moveCounter + gamePhase);
         int tempMoveCounter = moveCounter;
         int depth = fullDepth;
+        long startTime = System.currentTimeMillis();
         findBestMove(board, true, 0, depth, tempMoveCounter, player.equals("White"), isAllowedToAccessData);
+        long endTime = System.currentTimeMillis();
         System.out.println("Num Recursions: " + recur);
+        System.out.println("Time: " + Util.rounded((endTime - startTime) / 1000.0) + " sec");
         System.out.println("------------------------");
         recur = 0;
         Arrays.fill(numSavedArr, 0);
