@@ -1,12 +1,6 @@
 chessBoard.makeMoveOverall(6, 4, 4, 4, false);
 chessBoard.makeMoveOverall(1, 4, 3, 4, false);
-chessBoard.makeMoveOverall(7, 1, 5, 2, false);
+chessBoard.makeMoveOverall(7, 3, 5, 5, false);
 chessBoard.makeMoveOverall(0, 1, 2, 2, false);
-chessBoard.makeMoveOverall(7, 6, 5, 5, false);
-chessBoard.makeMoveOverall(1, 3, 2, 3, false);
-chessBoard.makeMoveOverall(7, 5, 3, 1, false);
-chessBoard.makeMoveOverall(0, 2, 4, 6, false);
-chessBoard.makeMoveOverall(7, 4, 7, 6, false);
-chessBoard.makeMoveOverall(0, 6, 2, 5, false);
-chessBoard.makeMoveOverall(6, 3, 4, 3, false);
-chessBoard.makeMoveOverall(3, 4, 4, 3, false);
+chessBoard.makeMoveOverall(7, 5, 4, 2, false);
+chessBoard.makeMoveOverall(0, 6, 2, 7, false);

@@ -6,20 +6,18 @@ import java.io.*;
 import java.util.*;
 public class ChessGame {
     private static int recur = 0;
-    private static int numSavedD3 = 0;
-    private static int numSavedD4 = 0;
-    private static int numSavedD5 = 0;
-    private static int numSavedOverall = 0;
+    private static int[] numSavedArr = new int[4]; // D3, D4, D5, D6
     private static int moveCounter = 0;
     private static TreeMap<String, Integer> boardFreq = new TreeMap<>(); // Checks for 3 fold rule (tie)
     private static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); // Overall
     private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); // 0:D3; 1:D4; 2:D5;...
-    private static String folder = (System.getProperty("os.name").equals("Mac OS X")) ? "/Users/akash/software/Akash/Java Projects/Chess-Github/" : "E:/Akash/Java Projects/Chess-Github/";
+    private static String folder = ((System.getProperty("os.name").equals("Mac OS X")) ? "/Users/akash/software" : "E:") + "/Akash/Java Projects/Chess-Github/";
     private static ArrayList<Double[]> depthValToSkip = new ArrayList<>(); // 2,3,4,5...
     private static DataManager manager = new DataManager(folder);
-    private static int minPiecesRequired = 27;
+    private static int minPiecesRequired = 27; //should stop game if it isn't real deal and pieces are less than this val
     private static String d3StrToAdd = "";
-    private static boolean isRealDeal = false; //If it is, it won't log data (saves time)
+    private static boolean isRealDeal = true; //If it is, it won't log data (saves time)
+    private static boolean isComputerWhite = false; //Will determine which side has AI and which side doesn't
     public static void main(String args[]) { // Driver
         Double[] depth2valToSkip = { 2.0, 2.2, 2.4, 2.7, 3.0, 3.4, 4.0, 4.5 };
         Double[] depth3valToSkip = { 2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 5.5 };
@@ -40,10 +38,10 @@ public class ChessGame {
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
         System.out.print("\033[H\033[2J"); // Clear Console Command
         manager.clearMoveOutputFile();
-        fillBestMoveLog("moveTB-D6.txt", true/*Math.max(whiteDepth, blackDepth) == 6*/); // true for real deal
-        fillBestMoveLog("moveTB-D5.txt", Math.max(whiteDepth, blackDepth) == 5); // true for testing depth 5 only
-        fillBestMoveLog("moveTB-D4.txt", Math.max(whiteDepth, blackDepth) == 4); // true for real deal
-        fillBestMoveLog("moveTB-D3.txt", Math.max(whiteDepth, blackDepth) == 3); // true for testing depth 3 only
+        fillBestMoveLog("moveTB-D6.txt", (isRealDeal) ? true : Math.max(whiteDepth, blackDepth) == 6); // true for real deal
+        fillBestMoveLog("moveTB-D5.txt", (isRealDeal) ? false : Math.max(whiteDepth, blackDepth) == 5); // true for testing depth 5 only
+        fillBestMoveLog("moveTB-D4.txt", (isRealDeal) ? true : Math.max(whiteDepth, blackDepth) == 4); // true for real deal
+        fillBestMoveLog("moveTB-D3.txt", (isRealDeal) ? false : Math.max(whiteDepth, blackDepth) == 3); // true for testing depth 3 only
         System.out.println("Welcome to My Chess Game!");
         Scanner br = new Scanner(System.in);
         boolean currPlayerIsWhite = true;
@@ -61,12 +59,17 @@ public class ChessGame {
                 gamePhase = " (End Game)";
             }
             if (currPlayerIsWhite) {
-                // parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter +
-                // gamePhase, board, currPlayerIsWhite, br);
-                callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == whiteDepth, whiteDepth, "White");
+                if (isRealDeal && !isComputerWhite) {
+                    parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
+                }else {
+                    callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == whiteDepth, whiteDepth, "White");
+                }
             } else {
-                 //parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
-                callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == blackDepth, blackDepth, "Black");
+                if (isRealDeal && isComputerWhite) {
+                    parseAndMove("Make your move. (E.g. 6,0->4,0) : Move #" + moveCounter + gamePhase, board, currPlayerIsWhite, br);
+                } else {
+                    callAI(gamePhase, board, Math.max(whiteDepth, blackDepth) == blackDepth, blackDepth, "Black");
+                }
             }
             if (board.isCheckMate(!currPlayerIsWhite)) {
                 System.out.println((currPlayerIsWhite) ? "White Wins!" : "Black Wins!");
@@ -81,9 +84,14 @@ public class ChessGame {
             System.out.println("Current Game Board:");
             System.out.println(board);
             currPlayerIsWhite = !currPlayerIsWhite;
+            if (!isRealDeal && Util.numPieces(board.formatBoardForFile(isComputerWhite, 4)) < minPiecesRequired) {
+                System.out.println("Below minimum number of pieces.");
+                System.out.println("Data Collection ended.");
+                break;
+            }
         }
         moveCounter = 0;
-        // numSavedOverall = 0;
+        Arrays.fill(numSavedArr, 0);
         bestMoveLogList.clear();
         boardFreq.clear();
         bestMoveLog.clear();
@@ -98,20 +106,17 @@ public class ChessGame {
             boolean isComputerWhite, boolean isAllowedToAccessData) {
         recur++;
         if (depth > 0 && depth < maxDepth - 2
-                && bestMoveLogList.get(maxDepth - depth - 3)
-                        .get(board.formatBoardForFile(isComputerWhite, depth)) != null
+                && bestMoveLogList.get(maxDepth - depth - 3).get(board.formatBoardForFile(isComputerWhite, depth)) != null
                 && moveCounter > 2
                 && (boardFreq.get(board.toString()) == null || boardFreq.get(board.toString()) < 2)) {
             if (maxDepth - depth == 3) {
-                numSavedD3++;
+                numSavedArr[0]++;
             } else if (maxDepth - depth == 4) {
-                numSavedD4++;
+                numSavedArr[1]++;
             } else {
-                numSavedD5++;
+                numSavedArr[2]++;
             }
-            numSavedOverall++;
-            return bestMoveLogList.get(maxDepth - depth - 3).get(board.formatBoardForFile(isComputerWhite, depth))
-                    .getVal();
+            return bestMoveLogList.get(maxDepth - depth - 3).get(board.formatBoardForFile(isComputerWhite, depth)).getVal();
         }
         boolean isWhite = true;
         if ((isComputerTurn && !isComputerWhite) || (!isComputerTurn && isComputerWhite)) {
@@ -136,10 +141,8 @@ public class ChessGame {
         ArrayList<String> allPossibleMoves = board.retAllPossibleMoves(isWhite);
         HashMap<String, Double> tiedOptMoves = new HashMap<>();
         double bestSumOver1 = 0;
-        if (!(depth == 0 && (allPossibleMoves.size() == 1
-                || (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null
-                        && (boardFreq.get(board.toString()) == null || boardFreq.get(board.toString()) < 2)
-                        && isAllowedToAccessData)))) {
+        boolean mainDepthAlreadyFound = depth == 0 && (bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null && (boardFreq.get(board.toString()) == null || boardFreq.get(board.toString()) < 2) && isAllowedToAccessData);
+        if (!(depth == 0 && (allPossibleMoves.size() == 1 || mainDepthAlreadyFound))) {
             if (depth < maxDepth) {
                 for (int i = 0; i < allPossibleMoves.size(); i++) {
                     int initI = Integer.parseInt(allPossibleMoves.get(i).substring(0, 1));
@@ -239,6 +242,10 @@ public class ChessGame {
                     return 0;
                 }
             }
+        } else {
+            if (maxDepth > 2 && mainDepthAlreadyFound) {
+                numSavedArr[maxDepth - 3]++;
+            }
         }
         boolean isAlreadyFound = false;
         if (depth == 0 && bestMoveLog.get(board.formatBoardForFile(isComputerWhite, depth)) != null && (boardFreq.get(board.toString()) == null || boardFreq.get(board.toString()) < 2) && isAllowedToAccessData) {
@@ -261,41 +268,44 @@ public class ChessGame {
                 }
             }
         }
-        if (depth >= 0 && depth < maxDepth - 2 && (depth == 0 || moveCounter > 2)) {
-            String fileName = folder + "moveTB-D" + (maxDepth - depth) + ".txt";
-            boolean isAlreadyInIndivFile = true;
-            if (bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
-                bestMoveLogList.get(maxDepth-depth-3).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
-                isAlreadyInIndivFile = false;
-            }
-            if (!isAlreadyInIndivFile && !isAlreadyFound && ((maxDepth - depth != 3) ? true : (Util.numPieces(board.formatBoardForFile(isComputerWhite, depth)) >= minPiecesRequired))) {
-                if (maxDepth - depth == 3) {
-                    d3StrToAdd += "\n" + board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal);
-                } else {
-                    try{
-                        File file = new File(fileName);
-                        FileWriter writer = new FileWriter(file, true);
-                        if (file.length() != 0) {
-                            writer.write("\n");
+        if (!isRealDeal) {
+            //Stores new data in files
+            if (depth >= 0 && depth < maxDepth - 2 && (depth == 0 || moveCounter > 2)) {
+                String fileName = folder + "moveTB-D" + (maxDepth - depth) + ".txt";
+                boolean isAlreadyInIndivFile = true;
+                if (bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
+                    bestMoveLogList.get(maxDepth-depth-3).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
+                    isAlreadyInIndivFile = false;
+                }
+                if (!isAlreadyInIndivFile && !isAlreadyFound && ((maxDepth - depth != 3) ? true : (Util.numPieces(board.formatBoardForFile(isComputerWhite, depth)) >= minPiecesRequired))) {
+                    if (maxDepth - depth == 3) {
+                        d3StrToAdd += "\n" + board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal);
+                    } else {
+                        try{
+                            File file = new File(fileName);
+                            FileWriter writer = new FileWriter(file, true);
+                            if (file.length() != 0) {
+                                writer.write("\n");
+                            }
+                            writer.write(board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal));
+                            writer.close();
+                        }catch(Exception e) {
+                            System.out.println("FILE ERROR");
                         }
-                        writer.write(board.formatBoardForFile(isComputerWhite, depth) + ":" + optMove + " " + Util.rounded(optVal));
-                        writer.close();
-                    }catch(Exception e) {
-                        System.out.println("FILE ERROR");
                     }
                 }
             }
-        }
-        if (maxDepth - depth == 4 || depth == 0) { //Adds to D3 file in bulk
-            String fileName = folder + "moveTB-D3.txt";
-            try{
-                File file = new File(fileName);
-                FileWriter writer = new FileWriter(file, true);
-                writer.write(d3StrToAdd);
-                writer.close();
-                d3StrToAdd = "";
-            }catch(Exception e) {
-                System.out.println("FILE ERROR");
+            if (maxDepth - depth == 4 || depth == 0) { //Adds to D3 file in bulk
+                String fileName = folder + "moveTB-D3.txt";
+                try{
+                    File file = new File(fileName);
+                    FileWriter writer = new FileWriter(file, true);
+                    writer.write(d3StrToAdd);
+                    writer.close();
+                    d3StrToAdd = "";
+                }catch(Exception e) {
+                    System.out.println("FILE ERROR");
+                }
             }
         }
         if (depth == 0) {
@@ -317,39 +327,49 @@ public class ChessGame {
             } else {
                 board.movesSinceNoCaptureOrPawn = 0;
             }
-            System.out.println("--------------");
-            System.out.println("Num Same Values: " + tiedOptMoves.size());
-            System.out.println("Optimal Move: " + optMove);
-            System.out.println("Optimal Value: " + ((allPossibleMoves.size() == 1 || maxDepth == 0) ? "N/A" : Util.rounded(optVal)));
             if (allPossibleMoves.size() != 1 && (optVal >= 1000 || optVal < -900)) {
                 board.isAlmostCheckmate = true;
             } else {
                 board.isAlmostCheckmate = false;
             }
-            System.out.println("White Val: " + Util.rounded(board.getWhiteVal(moveCounter)));
-            System.out.println("Black Val: " + Util.rounded(board.getBlackVal(moveCounter)));
-            if (board.movesSinceNoCaptureOrPawn != 0) {
-                System.out.println("Moves Since No Capture/Pawn Mvmt: " + board.movesSinceNoCaptureOrPawn);
+            if (isRealDeal){
+                manager.appendToFile(initI, initJ, finI, finJ);
             }
-            System.out.println("Size of Overall TB: " + bestMoveLog.size());
-            System.out.println("Size of TB D-3: " + bestMoveLogList.get(0).size());
-            System.out.println("Size of TB D-4: " + bestMoveLogList.get(1).size());
-            if (maxDepth >= 5) {
-                System.out.println("Size of TB D-5: " + bestMoveLogList.get(2).size());
-                if (bestMoveLogList.get(3).size() > 5) {
-                    System.out.println("Size of TB D-6: " + bestMoveLogList.get(3).size());
-                }
-            }
-            System.out.println("Num Saved D3: " + numSavedD3);
-            System.out.println("Num Saved D4: " + numSavedD4);
-            System.out.println("Num Saved D5: " + numSavedD5);
-            System.out.println("Num Saved Overall: " + numSavedOverall);
-            manager.appendToFile(initI, initJ, finI, finJ);
             if (boardFreq.get(board.toString()) == null) {
                 boardFreq.put(board.toString(), 1);
             } else {
                 boardFreq.put(board.toString(), boardFreq.get(board.toString()) + 1);
             }
+
+            //Display Data on Console
+            System.out.println("--------------");
+            System.out.println("Num Same Values: " + tiedOptMoves.size());
+            System.out.println("Optimal Move: " + optMove);
+            System.out.println("Optimal Value: " + ((allPossibleMoves.size() == 1 || maxDepth == 0) ? "N/A" : Util.rounded(optVal)));
+            System.out.println("White Val: " + Util.rounded(board.getWhiteVal(moveCounter)));
+            System.out.println("Black Val: " + Util.rounded(board.getBlackVal(moveCounter)));
+            if (board.movesSinceNoCaptureOrPawn != 0) {
+                System.out.println("Moves Since No Capture/Pawn Mvmt: " + board.movesSinceNoCaptureOrPawn);
+            }
+            if (!isRealDeal) {
+                System.out.println("Size of Overall TB: " + bestMoveLog.size());
+                System.out.println("Size of TB D-3: " + bestMoveLogList.get(0).size());
+                System.out.println("Size of TB D-4: " + bestMoveLogList.get(1).size());
+                if (maxDepth >= 5) {
+                    System.out.println("Size of TB D-5: " + bestMoveLogList.get(2).size());
+                }
+                if (maxDepth >= 6) {
+                    System.out.println("Size of TB D-6: " + bestMoveLogList.get(3).size());
+                }
+            }
+            if (numSavedArr[0] != 0)
+                System.out.println("Num Saved D3: " + numSavedArr[0]);
+            if (numSavedArr[1] != 0)
+                System.out.println("Num Saved D4: " + numSavedArr[1]);
+            if (numSavedArr[2] != 0) 
+                System.out.println("Num Saved D5: " + numSavedArr[2]);
+            if (numSavedArr[3] != 0)
+                System.out.println("Num Saved D6: " + numSavedArr[3]);
         }
         return optVal;
     }
@@ -388,22 +408,19 @@ public class ChessGame {
         } else {
             boardFreq.put(board.toString(), boardFreq.get(board.toString()) + 1);
         }
-        manager.appendToFile(initI, initJ, finI, finJ);
+        if (isRealDeal){
+            manager.appendToFile(initI, initJ, finI, finJ);
+        }
     }
     public static void callAI(String gamePhase, Board board, boolean isAllowedToAccessData, int fullDepth, String player) {
         System.out.println(player + "'s Turn : Move #" + moveCounter + gamePhase);
         int tempMoveCounter = moveCounter;
         int depth = fullDepth;
-        // if (!board.isEarlyGame(moveCounter) && !board.isMidGame(moveCounter) && board.retAllPossibleMoves(currPlayerIsWhite).size() * board.retAllPossibleMoves(!currPlayerIsWhite).size() < 75) {
-        //     depth = depth2;
-        // }
         findBestMove(board, true, 0, depth, tempMoveCounter, player.equals("White"), isAllowedToAccessData);
         System.out.println("Num Recursions: " + recur);
         System.out.println("------------------------");
         recur = 0;
-        numSavedD3 = 0;
-        numSavedD4 = 0;
-        numSavedD5 = 0;
+        Arrays.fill(numSavedArr, 0);
     }
     public static void fillBestMoveLog(String filename, boolean checkToAdd) {
         TreeMap<String, MoveVal> bestMoveLogIndiv = new TreeMap<>();

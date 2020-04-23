@@ -57,7 +57,6 @@ public class DataManager {
     public void fullClean(int num) {
         cleanD3Duplicates();
         cleanD3RemoveBelowNum(num);
-        reportNumPieces();
     }
     public void cleanD3Duplicates() { // will remove all duplicates in D3 that are in D4 already
         TreeMap<String, String> uniqueBoardsAndMoves = new TreeMap<>(); //For D3 and D4
