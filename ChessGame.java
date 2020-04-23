@@ -17,8 +17,9 @@ public class ChessGame {
     private static String folder = (System.getProperty("os.name").equals("Mac OS X")) ? "/Users/akash/software/Akash/Java Projects/Chess-Github/" : "E:/Akash/Java Projects/Chess-Github/";
     private static ArrayList<Double[]> depthValToSkip = new ArrayList<>(); // 2,3,4,5...
     private static DataManager manager = new DataManager(folder);
-    private static int minPiecesRequired = 25;
+    private static int minPiecesRequired = 27;
     private static String d3StrToAdd = "";
+    private static boolean isRealDeal = false; //If it is, it won't log data (saves time)
     public static void main(String args[]) { // Driver
         Double[] depth2valToSkip = { 2.0, 2.2, 2.4, 2.7, 3.0, 3.4, 4.0, 4.5 };
         Double[] depth3valToSkip = { 2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 5.5 };
