@@ -543,9 +543,9 @@ public class Board {
         return retStr + ((isWhite) ? "1" : "0");
     }
     public boolean isEarlyGame(int moveCounter) {
-        return moveCounter < 18 || (whitePieces.size() > 14 && blackPieces.size() > 14);
+        return moveCounter < 18 && (whitePieces.size() > 13 && blackPieces.size() > 13);
     }
     public boolean isMidGame(int moveCounter) {
-        return moveCounter < 55 || (whitePieces.size() > 6 && blackPieces.size() > 6);
+        return (moveCounter < 40 || (whitePieces.size() > 7 && blackPieces.size() > 7)) && moveCounter < 55;
     }
 }
