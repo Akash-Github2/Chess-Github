@@ -1,6 +1,0 @@
-chessBoard.makeMoveOverall(6, 4, 4, 4, false);
-chessBoard.makeMoveOverall(1, 4, 3, 4, false);
-chessBoard.makeMoveOverall(7, 3, 5, 5, false);
-chessBoard.makeMoveOverall(0, 1, 2, 2, false);
-chessBoard.makeMoveOverall(7, 5, 4, 2, false);
-chessBoard.makeMoveOverall(0, 6, 2, 7, false);

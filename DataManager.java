@@ -4,12 +4,12 @@ public class DataManager {
     private ArrayList<String> filenames = new ArrayList<>(); //for 0:3, 1:4, 2:5, 3:6, 4: Moves Performed
     private ArrayList<Integer> fileLen = new ArrayList<>(); //doesn't include moves performed
     private ArrayList<String> fileSizes = new ArrayList<>(); //doesn't include moves performed
-    public DataManager(String folder) {
-        filenames.add(folder + "moveTB-D3.txt");
-        filenames.add(folder + "moveTB-D4.txt");
-        filenames.add(folder + "moveTB-D5.txt");
-        filenames.add(folder + "moveTB-D6.txt");
-        filenames.add(folder + "MovesPerformed.txt");
+    public DataManager() {
+        filenames.add("./moveTB-D3.txt");
+        filenames.add("./moveTB-D4.txt");
+        filenames.add("./moveTB-D5.txt");
+        filenames.add("./moveTB-D6.txt");
+        filenames.add("./MovesPerformed.txt");
     }
     public void reportNumPieces() {
         fileLen.clear();
@@ -59,7 +59,7 @@ public class DataManager {
         cleanD3RemoveBelowNum(num);
     }
     public void cleanD3Duplicates() { // will remove all duplicates in D3 that are in D4 already
-        TreeMap<String, String> uniqueBoardsAndMoves = new TreeMap<>(); //For D3 and D4
+        HashMap<String, String> uniqueBoardsAndMoves = new HashMap<>(); //For D3 and D4
         try { //Go through D4 file
             File myObj = new File(filenames.get(1));
             Scanner reader = new Scanner(myObj);

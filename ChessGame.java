@@ -8,16 +8,16 @@ public class ChessGame {
     private static int recur = 0;
     private static int[] numSavedArr = new int[4]; // D3, D4, D5, D6
     private static int moveCounter = 0;
-    private static TreeMap<String, Integer> boardFreq = new TreeMap<>(); // Checks for 3 fold rule (tie)
-    private static TreeMap<String, MoveVal> bestMoveLog = new TreeMap<>(); // Overall
-    private static ArrayList<TreeMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); // 0:D3; 1:D4; 2:D5;...
-    private static String folder = ((System.getProperty("os.name").equals("Mac OS X")) ? "/Users/akash/software" : "E:") + "/Akash/Java Projects/Chess-Github/";
+    private static HashMap<String, Integer> boardFreq = new HashMap<>(); // Checks for 3 fold rule (tie)
+    private static HashMap<String, MoveVal> bestMoveLog = new HashMap<>(); // Overall
+    private static ArrayList<HashMap<String, MoveVal>> bestMoveLogList = new ArrayList<>(); // 0:D3; 1:D4; 2:D5;...
     private static ArrayList<Double[]> depthValToSkip = new ArrayList<>(); // 2,3,4,5...
-    private static DataManager manager = new DataManager(folder);
+    private static DataManager manager = new DataManager();
     private static int minPiecesRequired = 27; //should stop game if it isn't real deal and pieces are less than this val
     private static String d3StrToAdd = "";
     private static boolean isRealDeal = true; //If it is, it won't log data (saves time)
     private static boolean isComputerWhite = false; //Will determine which side has AI and which side doesn't
+    private static boolean editMovesPerformedFile = false;
     public static void main(String args[]) { // Driver
         Double[] depth2valToSkip = { 2.0, 2.2, 2.4, 2.7, 3.0, 3.4, 4.0, 4.5 };
         Double[] depth3valToSkip = { 2.0, 2.2, 2.4, 2.8, 3.3, 3.8, 4.8, 5.5 };
@@ -37,7 +37,9 @@ public class ChessGame {
 
     public static void playGame(Board board, int whiteDepth, int blackDepth) {
         System.out.print("\033[H\033[2J"); // Clear Console Command
-        manager.clearMoveOutputFile();
+        if (editMovesPerformedFile) {
+            manager.clearMoveOutputFile();
+        }
         fillBestMoveLog("moveTB-D6.txt", (isRealDeal) ? true : Math.max(whiteDepth, blackDepth) == 6); // true for real deal
         fillBestMoveLog("moveTB-D5.txt", (isRealDeal) ? false : Math.max(whiteDepth, blackDepth) == 5); // true for testing depth 5 only
         fillBestMoveLog("moveTB-D4.txt", (isRealDeal) ? true : Math.max(whiteDepth, blackDepth) == 4); // true for real deal
@@ -271,7 +273,7 @@ public class ChessGame {
         if (!isRealDeal) {
             //Stores new data in files
             if (depth >= 0 && depth < maxDepth - 2 && (depth == 0 || moveCounter > 2)) {
-                String fileName = folder + "moveTB-D" + (maxDepth - depth) + ".txt";
+                String fileName = "./moveTB-D" + (maxDepth - depth) + ".txt";
                 boolean isAlreadyInIndivFile = true;
                 if (bestMoveLogList.get(maxDepth-depth-3).get(board.formatBoardForFile(isComputerWhite, depth)) == null) {
                     bestMoveLogList.get(maxDepth-depth-3).put(board.formatBoardForFile(isComputerWhite, depth), new MoveVal(optMove, optVal));
@@ -296,7 +298,7 @@ public class ChessGame {
                 }
             }
             if (maxDepth - depth == 4 || depth == 0) { //Adds to D3 file in bulk
-                String fileName = folder + "moveTB-D3.txt";
+                String fileName = "./moveTB-D3.txt";
                 try{
                     File file = new File(fileName);
                     FileWriter writer = new FileWriter(file, true);
@@ -332,7 +334,7 @@ public class ChessGame {
             } else {
                 board.isAlmostCheckmate = false;
             }
-            if (isRealDeal){
+            if (isRealDeal && editMovesPerformedFile){
                 manager.appendToFile(initI, initJ, finI, finJ);
             }
             if (boardFreq.get(board.toString()) == null) {
@@ -408,7 +410,7 @@ public class ChessGame {
         } else {
             boardFreq.put(board.toString(), boardFreq.get(board.toString()) + 1);
         }
-        if (isRealDeal){
+        if (isRealDeal && editMovesPerformedFile){
             manager.appendToFile(initI, initJ, finI, finJ);
         }
     }
@@ -426,9 +428,9 @@ public class ChessGame {
         Arrays.fill(numSavedArr, 0);
     }
     public static void fillBestMoveLog(String filename, boolean checkToAdd) {
-        TreeMap<String, MoveVal> bestMoveLogIndiv = new TreeMap<>();
+        HashMap<String, MoveVal> bestMoveLogIndiv = new HashMap<>();
         try {
-            File myObj = new File(folder + filename);
+            File myObj = new File("./" + filename);
             Scanner reader = new Scanner(myObj);
             while (reader.hasNextLine()) {
                 String line = reader.nextLine();

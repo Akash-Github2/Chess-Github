@@ -323,8 +323,6 @@ public class Board {
                   }
                 }
                 board[tempPossibleMoves.get(j)[0]][tempPossibleMoves.get(j)[1]] = origPiece;
-                tempPossibleMoves.remove(j);
-                j--;
             }
         }
         if (shouldReturn) {
@@ -335,7 +333,7 @@ public class Board {
         kingPossibleMoves = board[locKing[0]][locKing[1]].getPossibleMoves(this, whitePieces, blackPieces);
         return kingPossibleMoves.size() == 0;
     }
-    public boolean isTie(boolean isWhite, TreeMap<String, Integer> boardFreq) {
+    public boolean isTie(boolean isWhite, HashMap<String, Integer> boardFreq) {
         ArrayList<String> allPossibleMoves = retAllPossibleMoves(isWhite);
         if (allPossibleMoves.size() == 0 || (whitePieces.size() == 1 && blackPieces.size() == 1)) {
             return true;
